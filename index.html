@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sosyal Pusula</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <meta name="theme-color" content="#2563eb" />
+  <script src="./vendor/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --surface2: #f7f9fc;
+      --border: #dde4ed;
+      --text: #111827;
+      --muted: #5a6a7e;
+      --accent: #1a56a0;
+      --accent-soft: #dbeafe;
+      --accent2: #0e7c5b;
+      --accent2-soft: #d1fae5;
+      --danger: #c0392b;
+      --danger-soft: #fde8e6;
+      --ok: #0e7c5b;
+      --ok-soft: #d1fae5;
+      --warning: #b45309;
+      --warning-soft: #fef3c7;
+      --pulse: #7c3aed;
+      --pulse-soft: #ede9fe;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 2px 8px rgba(15,23,42,.07), 0 8px 24px rgba(15,23,42,.05);
+      --shadow-sm: 0 1px 4px rgba(15,23,42,.06);
+    }
+    * { box-sizing: border-box; }
+    [data-theme="dark"] {
+      --bg: #0d1117; --surface: #161b22; --surface2: #0d1117; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --accent-soft: #1c2d3f;
+      --accent2: #3fb950; --accent2-soft: #122d1c; --danger: #f85149; --danger-soft: #2d1117;
+      --ok: #3fb950; --ok-soft: #122d1c; --warning: #d29922; --warning-soft: #272115;
+      --pulse: #a78bfa; --pulse-soft: #2e1065;
+      background: var(--bg);
+    }
+    [data-theme="dark"] body { background: var(--bg); }
+    [data-theme="dark"] svg { background: radial-gradient(circle at center, #162032 0%, #0f172a 100%) !important; }
+    [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
+      background: var(--surface2) !important; color: var(--text) !important; border-color: var(--border) !important;
+    }
+    body { margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+    .app { max-width: 1320px; margin: 0 auto; padding: 24px; }
+    .shell { display: grid; grid-template-columns: 280px 1fr; gap: 20px; min-height: calc(100vh - 48px); }
+    .sidebar, .panel, .card, .table-wrap, .empty { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .sidebar { padding: 16px; display: flex; flex-direction: column; gap: 10px; position: sticky; top: 24px; height: fit-content; border-left: 3px solid var(--accent); }
+    .brand { padding: 8px 12px 14px; border-bottom: 1px solid var(--border); }
+    .brand h1 { margin: 0 0 3px; font-size: 18px; font-weight: 800; letter-spacing: -.3px; color: var(--accent); }
+    .brand p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .project-head { padding: 12px; border-radius: 14px; background: var(--surface2); border: 1px solid var(--border); }
+    .project-head strong { display: block; margin-bottom: 4px; }
+    .project-head span { color: var(--muted); font-size: 12px; }
+    .nav { display: flex; flex-direction: column; gap: 2px; }
+    .nav-group { margin-top: 10px; }
+    .nav-group-label { font-size: 10px; font-weight: 800; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px 6px; display: block; }
+    .nav button { width: 100%; text-align: left; border: 1px solid transparent; background: transparent; color: var(--text); padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: background .12s; }
+    .nav button .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+    .nav button.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-soft); font-weight: 700; }
+    .nav button:hover:not(.active) { background: var(--surface2); }
+    .content { min-width: 0; }
+    .panel { padding: 22px; }
+    .page-header { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 20px; }
+    .page-title { margin: 0 0 6px; font-size: 28px; }
+    .page-subtitle { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; justify-content: center; text-decoration: none; }
+    .btn:hover { filter: brightness(.99); }
+    .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+    .btn-soft { background: var(--surface2); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .field label { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .input, .select, .textarea { width: 100%; border: 1px solid var(--border); background: white; border-radius: 12px; padding: 11px 12px; font: inherit; color: var(--text); }
+    .textarea { min-height: 120px; resize: vertical; }
+    .input:focus, .select:focus, .textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .card { padding: 18px; transition: box-shadow .15s; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-value { font-size: 28px; font-weight: 800; margin-top: 4px; line-height: 1; }
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #e8eef7; vertical-align: top; font-size: 14px; }
+    th { font-size: 11px; letter-spacing: .05em; color: var(--muted); text-transform: uppercase; background: var(--surface2); position: sticky; top: 0; font-weight: 700; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; border: 1px solid transparent; }
+    .badge-ok { background: var(--ok-soft); color: var(--ok); }
+    .badge-warn { background: var(--warning-soft); color: var(--warning); }
+    .badge-danger { background: var(--danger-soft); color: var(--danger); }
+    .badge-soft { background: var(--surface2); color: var(--muted); border-color: var(--border); }
+    .empty { padding: 48px 24px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .empty-icon { font-size: 36px; opacity: .4; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .empty-desc { font-size: 13px; max-width: 300px; line-height: 1.6; }
+    .notice, .error, .success { padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-size: 14px; border: 1px solid transparent; }
+    .notice { background: var(--surface2); border-color: var(--border); color: var(--muted); }
+    .error { background: var(--danger-soft); border-color: #fecaca; color: var(--danger); }
+    .success { background: var(--ok-soft); border-color: #bbf7d0; color: var(--ok); }
+    .warning { background: var(--warning-soft); border-color: #fed7aa; color: var(--warning); }
+    .section-title { font-size: 13px; font-weight: 800; color: var(--muted); letter-spacing: .06em; margin: 18px 0 10px; }
+    .question-card { border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: white; }
+    .question-card h4 { margin: 0 0 8px; font-size: 16px; }
+    .question-card p { margin: 0 0 12px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+    svg { display: block; width: 100%; height: auto; background: radial-gradient(circle at center, #f8fbff 0%, #eef4fb 100%); }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .projects-list { display: flex; flex-direction: column; gap: 12px; }
+    .project-item { border: 1px solid var(--border); border-radius: 12px; padding: 18px; background: var(--surface); transition: box-shadow .15s, transform .1s; cursor: pointer; }
+    .project-item:hover { box-shadow: 0 4px 16px rgba(26,86,160,.1); transform: translateY(-1px); }
+    .project-item h3 { margin: 0 0 8px; }
+    .project-item p { margin: 0; color: var(--muted); font-size: 13px; }
+    .split { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .match-list { margin: 0; padding-left: 18px; }
+    .detail-panel { position: fixed; right: 0; top: 0; height: 100vh; width: 320px; background: var(--surface); border-left: 1px solid var(--border); box-shadow: 0 4px 18px rgba(0,0,0,.12); padding: 24px; overflow-y: auto; z-index: 100; transform: translateX(100%); transition: transform .25s; }
+    .detail-panel.open { transform: translateX(0); }
+    .detail-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; }
+    .detail-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; padding-right: 24px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+    .detail-metric { background: var(--surface2); border-radius: 10px; padding: 10px 12px; }
+    .detail-metric-label { font-size: 11px; color: var(--muted); }
+    .detail-metric-val { font-size: 22px; font-weight: 700; }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .install-fab { position: fixed; right: 20px; bottom: 20px; z-index: 110; box-shadow: 0 14px 32px rgba(37,99,235,.28); }
+    .install-fab.hidden { display: none; }
+    @media (max-width: 980px) { .shell { grid-template-columns: 1fr; } .sidebar { position: static; } .grid-2, .grid-3, .stats { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .app { padding: 10px; } .shell { gap: 10px; } .panel { padding: 14px; } .page-title { font-size: 22px; } .sidebar { padding: 12px; } .btn { padding: 8px 10px; font-size: 13px; } .detail-panel { width: 100% !important; } table { min-width: 500px; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <aside class="sidebar" id="sidebar"></aside>
+      <main class="content">
+        <div class="panel" id="view"></div>
+      </main>
+    </div>
+  </div>
+  <button class="btn btn-primary install-fab hidden" id="install-app-btn">Uygulamayı Yükle</button>
+<script>
+const STORAGE_KEY = 'sosyometri_local_projects_v2';
+(function(){ const t = localStorage.getItem('sosyo_theme') || 'light'; document.documentElement.setAttribute('data-theme', t); })();
+const ui = { currentProjectId: null, currentPage: 'projects', messages: [], analysisTab: 'sosyo' };
+
+function nowISO() { return new Date().toISOString(); }
+function uid(prefix='id') { return prefix + '_' + Math.random().toString(36).slice(2, 10); }
+function esc(str) { return String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function formatDate(v) { if (!v) return '—'; const d = new Date(v); if (Number.isNaN(d.getTime())) return String(v); return d.toLocaleString('tr-TR'); }
+function loadProjects() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
+function saveProjects(projects) { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); }
+function getProjects() { return loadProjects(); }
+function getProject() { return getProjects().find(p => p.id === ui.currentProjectId) || null; }
+function updateProject(project) { const projects = getProjects(); const idx = projects.findIndex(p => p.id === project.id); if (idx >= 0) projects[idx] = project; else projects.push(project); saveProjects(projects); }
+function deleteProject(id) { saveProjects(getProjects().filter(p => p.id !== id)); if (ui.currentProjectId === id) { ui.currentProjectId = null; ui.currentPage = 'projects'; } }
+function projectTemplate(name='Yeni Proje') {
+  return { id: uid('proj'), name, createdAt: nowISO(), updatedAt: nowISO(), institution: { name:'', type:'', unit:'', city:'', notes:'', codePrefix:'' }, schema: { requiredFields: [{ key:'fullName', label:'Ad Soyad', type:'text', required:true }, { key:'gender', label:'Cinsiyet', type:'select', required:false, options:['Kadın','Erkek'] }], customFields: [] }, participants: [], questions: [], responses: [], analysis: { calculatedAt:null, relations:[], personMetrics:[], groupMetrics:null, unmatchedNames:[], pulseMetrics: null }, importInfo: null };
+}
+function normalizeTR(s) { return String(s ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/İ/g,'I').replace(/ı/g,'i').replace(/Ö/g,'O').replace(/ö/g,'o').replace(/Ü/g,'U').replace(/ü/g,'u').replace(/Ş/g,'S').replace(/ş/g,'s').replace(/Ğ/g,'G').replace(/ğ/g,'g').replace(/Ç/g,'C').replace(/ç/g,'c').toUpperCase().replace(/[^A-Z0-9 ]+/g,' ').replace(/\s+/g,' ').trim(); }
+function splitNames(value) { if (!value) return []; return String(value).replace(/\r/g,'\n').replace(/\u2022/g,'\n').replace(/\s+-\s+/g,'\n').replace(/\d+\)/g,'\n').replace(/\d+\./g,'\n').split(/[\n,;\/]+/).map(s=>s.trim()).filter(Boolean); }
+function inferQuestionCategory(title) { const n = normalizeTR(title); if (/ISTEMEZ|UYGUN GORMEZ|DISLAR|UZAK|REDD|OLMASIN/.test(n) && /SENI|SIZI|LISTESINE|TAHMIN|SANIYORSUN/.test(n)) return 'algılanan-itme'; if (/LISTESINE|TAHMIN|SANIYORSUN|KIM ALIR|SENI SECEN|ALACAGINI/.test(n)) return 'algılanan-seçim'; if (/ISTEMEZ|UYGUN GORMEZ|DISLAR|IT|UZAK|REDD|OLMASIN/.test(n)) return 'itme'; return 'seçim'; }
+function inferFieldKey(header) { const n = normalizeTR(header); if (/AD.*SOYAD/.test(n)) return 'fullName'; if (/CINSIYET/.test(n)) return 'gender'; if (/YAS/.test(n)) return 'yas'; if (/EGITIM/.test(n)) return 'egitimDurumu'; return n.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || uid('alan'); }
+function questionLike(header) { const n = normalizeTR(header); if (/ZAMAN/.test(n)) return false; if (/BEKLENT/.test(n)) return false; if (/HANGI|KIM|LISTESINE|OTURMAK|KATILMAK/.test(n)) return true; if (header.includes('?')) return true; return false; }
+function buildRelations(project, useRankWeight) {
+  const questionMap = new Map(project.questions.map(q => [q.id, q.category]));
+  const rels = [];
+  for (const response of project.responses) {
+    if (!response.respondentId || response.status === 'invalid' || response.status === 'excluded') continue;
+    for (const answer of response.answers) {
+      const type = questionMap.get(answer.questionId);
+      if (!type) continue;
+      if (['pulse-scale','pulse-yesno','pulse-text'].includes(type)) continue;
+      const isAlgi = type === 'algılanan-seçim' || type === 'algılanan-itme';
+      const effectiveType = isAlgi ? (type === 'algılanan-seçim' ? 'seçim' : 'itme') : type;
+      for (let i = 0; i < answer.selectedIds.length; i++) {
+        const targetId = answer.selectedIds[i];
+        if (!targetId || targetId === response.respondentId) continue;
+        const weight = useRankWeight ? Math.max(1, answer.selectedIds.length - i) : 1;
+        if (isAlgi) rels.push({ from: targetId, to: response.respondentId, questionId: answer.questionId, type: effectiveType, weight, isAlgi: true });
+        else rels.push({ from: response.respondentId, to: targetId, questionId: answer.questionId, type: effectiveType, weight, isAlgi: false });
+      }
+    }
+  }
+  return rels;
+}
+function buildPersonMetrics(project, relations) {
+  const active = project.participants.filter(p => p.active); const N = active.length;
+  return active.map(p => {
+    const pid = p.id;
+    const rc = relations.filter(r => r.to === pid && r.type === 'seçim').length;
+    const rr = relations.filter(r => r.to === pid && r.type === 'itme').length;
+    const sc = relations.filter(r => r.from === pid && r.type === 'seçim').length;
+    const sr = relations.filter(r => r.from === pid && r.type === 'itme').length;
+    const mc = relations.filter(r => r.from === pid && r.type === 'seçim' && relations.some(r2 => r2.from === r.to && r2.to === pid && r2.type === 'seçim')).length;
+    const mr = relations.filter(r => r.from === pid && r.type === 'itme' && relations.some(r2 => r2.from === r.to && r2.to === pid && r2.type === 'itme')).length;
+    const sss = N > 1 ? (rc - rr) / (N - 1) : 0;
+    const perceivedChoices = relations.filter(r => r.to === pid && r.type === 'seçim' && r.isAlgi).length;
+    const actualChoices = rc;
+    const perceptualAccuracy = actualChoices > 0 ? Math.min(perceivedChoices, actualChoices) / Math.max(perceivedChoices, actualChoices) : (perceivedChoices === 0 ? 1 : 0);
+    const expansivity = N > 1 ? Math.round((sc / (N - 1)) * 100) / 100 : 0;
+    let isolationType = null;
+    if (rc===0 && sc===0 && rr===0 && sr===0) isolationType = 'tam';
+    else if (rc===0 && sc>0) isolationType = 'tek-yonlu';
+    return { participantId: pid, receivedChoices: rc, receivedRejections: rr, sentChoices: sc, sentRejections: sr, mutualChoices: mc, mutualRejections: mr, netScore: rc-rr, sss: Math.round(sss*100)/100, expansivity, isolationType, perceivedChoices, perceptualAccuracy: Math.round(perceptualAccuracy*100) };
+  });
+}
+function buildGroupMetrics(project, personMetrics, relations) {
+  const active = project.participants.filter(p => p.active);
+  const respondentIds = new Set(project.responses.filter(r => r.respondentId && r.status !== 'invalid' && r.status !== 'excluded').map(r => r.respondentId));
+  const mostChosen = [...personMetrics].sort((a,b) => b.receivedChoices-a.receivedChoices).slice(0,3).filter(x=>x.receivedChoices>0).map(x=>x.participantId);
+  const mostRejected = [...personMetrics].sort((a,b) => b.receivedRejections-a.receivedRejections).slice(0,3).filter(x=>x.receivedRejections>0).map(x=>x.participantId);
+  const seen = new Set(); const mutualChoicePairs = []; const mutualRejectionPairs = [];
+  for (const r of relations) { const key = [r.from,r.to,r.type].sort().join('_'); if (seen.has(key)) continue; const m = relations.find(r2=>r2.from===r.to&&r2.to===r.from&&r2.type===r.type); if (m) { seen.add(key); if (r.type==='seçim') mutualChoicePairs.push([r.from,r.to]); else mutualRejectionPairs.push([r.from,r.to]); } }
+  const nonRespondents = active.filter(p=>!respondentIds.has(p.id)).map(p=>p.id);
+  const genderStats = {};
+  for (const r of relations.filter(r=>r.type==='seçim')) { const fp=active.find(p=>p.id===r.from); const tp=active.find(p=>p.id===r.to); if(!fp||!tp) continue; const fg=(fp.values.gender||'').toLowerCase().includes('erkek')?'E':'K'; const tg=(tp.values.gender||'').toLowerCase().includes('erkek')?'E':'K'; const key=fg+'→'+tg; genderStats[key]=(genderStats[key]||0)+1; }
+  const adjMap = new Map(active.map(p=>[p.id,new Set()]));
+  for (const [a,b] of mutualChoicePairs) { adjMap.get(a)?.add(b); adjMap.get(b)?.add(a); }
+  const visited = new Set(); const cliques = [];
+  for (const p of active) { if (visited.has(p.id)) continue; const group=[]; const stack=[p.id]; while(stack.length){const curr=stack.pop();if(visited.has(curr))continue;visited.add(curr);group.push(curr);adjMap.get(curr)?.forEach(n=>{if(!visited.has(n))stack.push(n);});} if(group.length>1) cliques.push(group); }
+  const fullyIsolated = personMetrics.filter(m=>m.isolationType==='tam').map(m=>m.participantId);
+  const oneWayIsolated = personMetrics.filter(m=>m.isolationType==='tek-yonlu').map(m=>m.participantId);
+  const stars = personMetrics.filter(m=>m.sss>=0.3&&m.receivedRejections<=1).map(m=>m.participantId);
+  const isolated = personMetrics.filter(m=>m.receivedChoices===0&&m.sentChoices===0&&m.receivedRejections===0&&m.sentRejections===0).map(m=>m.participantId);
+  const choiceRels = relations.filter(r=>r.type==='seçim').length;
+  const N = active.length; const maxPossible = N>1?N*(N-1):1;
+  const networkDensity = Math.round((choiceRels/maxPossible)*100);
+  const mutualRate = choiceRels>0?Math.round((mutualChoicePairs.length*2/choiceRels)*100):0;
+  const autoSummary = [];
+  autoSummary.push('Grubun katılım oranı %'+Math.round((respondentIds.size/(active.length||1))*100)+'tir ('+respondentIds.size+'/'+active.length+' kişi).');
+  if(stars.length) autoSummary.push(stars.length+' kişi yüksek tercih skoru ile öne çıkmaktadır.');
+  if(fullyIsolated.length) autoSummary.push(fullyIsolated.length+' kişi sosyometrik ağın tamamen dışındadır (tam izole).');
+  if(oneWayIsolated.length) autoSummary.push(oneWayIsolated.length+' kişi seçim yapıyor ancak hiç seçilmiyor (tek yönlü izole).');
+  autoSummary.push('Seçim ağının yoğunluğu %'+networkDensity+'tür.');
+  autoSummary.push('Karşılıklı seçim oranı %'+mutualRate+'tir ('+mutualChoicePairs.length+' çift).');
+  if(cliques.length) autoSummary.push(cliques.length+' alt grup/küme tespit edilmiştir.');
+  if(mutualRejectionPairs.length) autoSummary.push(mutualRejectionPairs.length+' karşılıklı itme ilişkisi bulunmaktadır.');
+  return { totalParticipants:active.length, totalRespondents:respondentIds.size, participationRate:active.length?respondentIds.size/active.length:0, mostChosen, mostRejected, isolated, fullyIsolated, oneWayIsolated, stars, mutualChoicePairs, mutualRejectionPairs, nonRespondents, genderStats, cliques, networkDensity, mutualRate, autoSummary };
+}
+function buildPulseMetrics(project) {
+  const PULSE_CATS = ['pulse-scale','pulse-yesno','pulse-text'];
+  const pulseQs = project.questions.filter(q => PULSE_CATS.includes(q.category));
+  if (!pulseQs.length) return null;
+
+  const active = project.participants.filter(p => p.active);
+  const validResps = project.responses.filter(r =>
+    r.respondentId && r.status !== 'excluded' && r.status !== 'invalid'
+  );
+
+  // Soru bazlı istatistikler
+  const questionStats = {};
+  const dimMap = {};
+
+  for (const q of pulseQs) {
+    const answers = validResps.map(r => {
+      const ans = (r.answers || []).find(a => a.questionId === q.id);
+      return ans?.numericValue ?? null;
+    }).filter(v => v !== null);
+
+    const avg = answers.length
+      ? Math.round(answers.reduce((s,v) => s+v, 0) / answers.length * 10) / 10
+      : null;
+    const maxVal = q.pulseMax || 5;
+
+    questionStats[q.id] = { avg, maxVal, count: answers.length, answers };
+
+    if (avg !== null && q.category === 'pulse-scale') {
+      const dim = q.pulseDimension || 'genel';
+      if (!dimMap[dim]) dimMap[dim] = [];
+      dimMap[dim].push(Math.round((avg / maxVal) * 100));
+    }
+  }
+
+  // Boyut ortalamaları
+  const dimensionAverages = {};
+  for (const [dim, vals] of Object.entries(dimMap)) {
+    dimensionAverages[dim] = Math.round(vals.reduce((s,v) => s+v, 0) / vals.length);
+  }
+
+  // Kişi bazlı pulse skoru (0-100)
+  const personPulseScores = {};
+  for (const p of active) {
+    const resp = validResps.find(r => r.respondentId === p.id);
+    if (!resp) { personPulseScores[p.id] = null; continue; }
+    const scores = [];
+    for (const q of pulseQs.filter(q => q.category === 'pulse-scale')) {
+      const ans = (resp.answers || []).find(a => a.questionId === q.id);
+      if (ans?.numericValue !== undefined) {
+        scores.push(Math.round((ans.numericValue / (q.pulseMax || 5)) * 100));
+      }
+    }
+    personPulseScores[p.id] = scores.length
+      ? Math.round(scores.reduce((s,v) => s+v, 0) / scores.length)
+      : null;
+  }
+
+  return { questionStats, dimensionAverages, personPulseScores };
+}
+
+function runAnalysis(project) {
+  const relations = buildRelations(project);
+  const personMetrics = buildPersonMetrics(project, relations);
+  const groupMetrics = buildGroupMetrics(project, personMetrics, relations);
+  const pulseMetrics = buildPulseMetrics(project);
+  project.analysis = { ...(project.analysis||{}), calculatedAt: nowISO(), relations, personMetrics, groupMetrics, pulseMetrics, unmatchedNames: project.analysis?.unmatchedNames||[] };
+  project.updatedAt = nowISO(); updateProject(project); return project.analysis;
+}
+function participantName(project, participantId) { const p = project.participants.find(x => x.id === participantId); return p ? String(p.values.fullName || '—') : participantId; }
+function participantCode(project, participantId) { const p = project.participants.find(x => x.id === participantId); if(!p) return participantId; return p.values.code || p.values.fullName || '—'; }
+function showMessage(type, text) { ui.messages = [{ type, text }]; render(); }
+function renderMessages() { return ui.messages.map(m => `<div class="${m.type}">${esc(m.text)}</div>`).join(''); }
+function openProject(id) { ui.currentProjectId = id; ui.currentPage = 'institution'; ui.messages = []; render(); }
+function allFields(project) { return [...project.schema.requiredFields, ...project.schema.customFields]; }
+
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar'); const project = getProject();
+  if (!project) {
+    sidebar.innerHTML = `<div class="brand"><h1>Sosyal Pusula</h1><p>from Çağatay TOKGÖZ</p></div><div class="notice" style="font-size:12px;">Veriler tarayıcıda saklanır. Yedek almayı unutma.</div><div class="nav"><button class="active"><span class="nav-icon">🗂</span>Projeler</button></div><button class="btn btn-soft" id="dark-mode-toggle-home" style="font-size:14px;padding:8px;">🌙</button>`;
+    return;
+  }
+  const navGroups = [
+    { label: 'Hazırlık', items: [['institution','Çalışma','🏛'],['participants','Katılımcılar','👥'],['questions','Ölçek','📋']] },
+    { label: 'Veri', items: [['excel','Veri Aktar','📂'],['googleform','Form Yönetimi','📝'],['responses','Yanıtlar','✅']] },
+    { label: 'Sonuç', items: [['analysis','Analiz','📊'],['sociogram','Sosyogram','🔵'],['mudahale','Müdahale','🎯'],['reports','Rapor','📄']] }
+  ];
+  sidebar.innerHTML = `
+    <div class="brand"><h1>Sosyal Pusula</h1><p>from Çağatay TOKGÖZ</p></div>
+    <div class="project-head">
+      <strong>${esc(project.name)}</strong>
+      <span>${project.participants.filter(p=>p.active).length} kişi · ${project.questions.length} soru</span>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px;">
+        ${[[project.institution.name,'Kurum bilgileri'],[project.participants.filter(p=>p.active).length>0,'Kişiler eklendi'],[project.questions.length>0,'Sorular eklendi'],[project.responses.length>0,'Yanıtlar var'],[project.analysis.calculatedAt,'Analiz çalıştırıldı']].map(([done,label])=>`<div style="font-size:11px;color:${done?'var(--ok)':'var(--muted)'};">${done?'✓':'○'} ${label}</div>`).join('')}
+      </div>
+    </div>
+    <div class="nav">
+      ${navGroups.map(g=>`<div class="nav-group"><span class="nav-group-label">${g.label}</span>${g.items.map(([key,label,icon])=>`<button data-page="${key}" class="${ui.currentPage===key?'active':''}"><span class="nav-icon">${icon}</span>${esc(label)}</button>`).join('')}</div>`).join('')}
+    </div>
+    <div style="display:flex;gap:6px;margin-top:4px;">
+      <button class="btn btn-soft" id="back-projects" style="flex:1;font-size:12px;">← Projeler</button>
+      <button class="btn btn-soft" id="dark-mode-toggle" title="Karanlık/Aydınlık mod" style="padding:8px 10px;font-size:14px;">🌙</button>
+    </div>`;
+  sidebar.querySelectorAll('[data-page]').forEach(btn => btn.onclick = () => { ui.currentPage = btn.dataset.page; ui.messages=[]; render(); });
+  sidebar.querySelector('#back-projects').onclick = () => { ui.currentProjectId = null; ui.currentPage = 'projects'; ui.messages=[]; render(); };
+  const dmBtn = sidebar.querySelector('#dark-mode-toggle');
+  if(dmBtn) dmBtn.onclick = () => { const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; document.documentElement.setAttribute('data-theme', isDark?'light':'dark'); localStorage.setItem('sosyo_theme', isDark?'light':'dark'); };
+}
+
+function renderProjectsPage() {
+  const projects = getProjects().sort((a,b) => new Date(b.updatedAt)-new Date(a.updatedAt));
+  return `<div class="page-header"><div><h2 class="page-title">Projeler</h2><p class="page-subtitle">Yeni proje oluştur veya mevcut projeyi aç.</p></div></div>
+  ${renderMessages()}
+  <div class="card" style="margin-bottom:18px;"><div class="row" style="align-items:flex-end;"><div class="field" style="flex:1 1 320px;"><label>Yeni Proje Adı</label><input id="new-project-name" class="input" placeholder="örn: Ekip İçi Gelişim Atölyeleri"/></div><button class="btn btn-primary" id="create-project">Proje Oluştur</button><button class="btn btn-soft" onclick="importProjectFromFile()">📂 İçe Aktar</button></div></div>
+  ${projects.length ? `<div class="projects-list">${projects.map(p=>`<div class="project-item"><div class="split"><div><h3 style="margin:0 0 6px;font-size:16px;">${esc(p.name)}</h3><div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);"><span>👥 ${p.participants.filter(x=>x.active).length} katılımcı</span><span>📋 ${p.questions.length} soru</span><span>✅ ${p.responses?p.responses.length:0} yanıt</span>${p.analysis&&p.analysis.calculatedAt?'<span style="color:var(--ok);">📊 Analiz yapıldı</span>':'<span>○ Analiz yok</span>'}<span>🕐 ${esc(formatDate(p.updatedAt))}</span></div></div><div class="row"><button class="btn btn-primary" data-open="${p.id}">Aç</button><button class="btn btn-soft" data-export="${p.id}">📥 Yedek</button><button class="btn btn-danger" data-delete="${p.id}">Sil</button></div></div></div>`).join('')}</div>` : `<div class="empty"><div class="empty-icon">🗂</div><div class="empty-title">Henüz proje yok</div><div class="empty-desc">Yukarıdan yeni bir proje oluştur.</div></div>`}`;
+}
+function bindProjectsPage() {
+  const dmHome = document.getElementById('dark-mode-toggle-home');
+  if(dmHome) dmHome.onclick = () => { const isDark = document.documentElement.getAttribute('data-theme')==='dark'; document.documentElement.setAttribute('data-theme',isDark?'light':'dark'); localStorage.setItem('sosyo_theme',isDark?'light':'dark'); };
+  document.getElementById('create-project').onclick = () => { const input=document.getElementById('new-project-name'); const name=input.value.trim(); if(!name) return showMessage('error','Proje adı boş olamaz.'); const p=projectTemplate(name); updateProject(p); openProject(p.id); };
+  document.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openProject(btn.dataset.open));
+  document.querySelectorAll('[data-export]').forEach(btn => btn.onclick = () => { const p=getProjects().find(x=>x.id===btn.dataset.export); if(p) exportProject(p); });
+  document.querySelectorAll('[data-delete]').forEach(btn => btn.onclick = () => { if(!confirm('Projeyi silmek istediğine emin misin?')) return; deleteProject(btn.dataset.delete); render(); });
+}
+
+function renderInstitutionPage(project) {
+  const f = project.institution;
+  return `<div class="page-header"><div><h2 class="page-title">Çalışma</h2><p class="page-subtitle">Proje adı, kurum ve genel ayarlar.</p></div><button class="btn btn-primary" id="save-institution">Kaydet</button></div>
+  ${renderMessages()}
+  <div class="card"><div class="grid-2"><div class="field"><label>Kurum Adı</label><input id="inst-name" class="input" value="${esc(f.name)}"></div><div class="field"><label>Kurum Türü</label><input id="inst-type" class="input" value="${esc(f.type)}"></div></div>
+  <div class="grid-2" style="margin-top:14px;"><div class="field"><label>Birim / Grup</label><input id="inst-unit" class="input" value="${esc(f.unit)}"></div><div class="field"><label>Şehir</label><input id="inst-city" class="input" value="${esc(f.city)}"></div></div>
+  <div class="grid-2" style="margin-top:14px;"><div class="field"><label>Katılımcı Kod Öneki</label><input id="inst-codeprefix" class="input" value="${esc(f.codePrefix||'')}" placeholder="örn: AS"></div><div class="field" style="align-self:flex-end;"><button class="btn btn-soft" id="assign-codes-btn" ${project.participants.filter(p=>p.active).length===0?'disabled':''}>🔢 Kodları Ata</button><div class="small muted" style="margin-top:6px;">Mevcut kişilere sırayla kod verir</div></div></div>
+  <div class="field" style="margin-top:14px;"><label>Notlar</label><textarea id="inst-notes" class="textarea">${esc(f.notes)}</textarea></div></div>`;
+}
+function bindInstitutionPage(project) {
+  document.getElementById('save-institution').onclick = () => { project.institution={name:document.getElementById('inst-name').value,type:document.getElementById('inst-type').value,unit:document.getElementById('inst-unit').value,city:document.getElementById('inst-city').value,notes:document.getElementById('inst-notes').value,codePrefix:document.getElementById('inst-codeprefix').value.trim().toUpperCase()}; project.updatedAt=nowISO(); updateProject(project); showMessage('success','Kurum bilgileri kaydedildi.'); };
+  const assignBtn = document.getElementById('assign-codes-btn');
+  if(assignBtn) assignBtn.onclick = () => { const prefix=document.getElementById('inst-codeprefix').value.trim().toUpperCase(); if(!prefix) return showMessage('error','Önce kod önekini gir.'); project.institution.codePrefix=prefix; project.participants.filter(p=>p.active).forEach((p,i)=>{p.values.code=prefix+(i+1);}); project.updatedAt=nowISO(); updateProject(project); showMessage('success',prefix+'1–'+prefix+project.participants.filter(p=>p.active).length+' kodları atandı.'); render(); };
+}
+
+function renderParticipantsPage(project) {
+  const fields = allFields(project);
+  return `<div class="page-header"><div><h2 class="page-title">Katılımcılar</h2><p class="page-subtitle">${project.participants.filter(p=>p.active).length} aktif katılımcı</p></div><div class="row"><button class="btn btn-soft" id="sort-participants-toggle">A-Z Sırala</button><button class="btn btn-soft" id="bulk-import-toggle">📋 Toplu Ekle</button><button class="btn btn-primary" id="add-participant-toggle">Kişi Ekle</button></div></div>
+  ${renderMessages()}<div id="participant-forms"></div>
+  ${project.participants.filter(p=>p.active).length ? `<div class="table-wrap"><table><thead><tr><th>Kod</th>${fields.map(f=>`<th>${esc(f.label)}</th>`).join('')}<th>İşlem</th></tr></thead><tbody>${project.participants.filter(p=>p.active).map(p=>`<tr><td><strong style="letter-spacing:1px;color:var(--accent);">${esc(p.values.code||'—')}</strong></td>${fields.map(f=>`<td>${esc(p.values[f.key]??'—')}</td>`).join('')}<td><div class="row"><button class="btn btn-soft" data-edit-participant="${p.id}">Düzenle</button><button class="btn btn-danger" data-remove-participant="${p.id}">Sil</button></div></td></tr>`).join('')}</tbody></table></div>` : `<div class="empty"><div class="empty-icon">👥</div><div class="empty-title">Katılımcı yok</div><div class="empty-desc">Kişi Ekle veya Toplu Ekle ile katılımcı ekle.</div></div>`}`;
+}
+function bindParticipantsPage(project) {
+  const forms = document.getElementById('participant-forms'); const fields = allFields(project);
+  function renderAddPersonForm(editId=null) {
+    const current = editId ? project.participants.find(p=>p.id===editId) : null;
+    forms.innerHTML = `<div class="card" style="margin-bottom:18px;"><div class="section-title">${editId?'Kişiyi Düzenle':'Yeni Kişi'}</div><div class="grid-2">${fields.map(f=>{const val=current?(current.values[f.key]??''):'';if(f.type==='select'&&f.options){return`<div class="field"><label>${esc(f.label)}</label><select class="select" data-field="${f.key}"><option value="">Seçin…</option>${f.options.map(o=>`<option ${String(val)===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;}return`<div class="field"><label>${esc(f.label)}</label><input class="input" data-field="${f.key}" value="${esc(val)}"></div>`;}).join('')}</div><div class="row" style="margin-top:14px;"><button class="btn btn-primary" id="save-person">Kaydet</button><button class="btn" id="cancel-person">İptal</button></div></div>`;
+    document.getElementById('cancel-person').onclick = () => forms.innerHTML = '';
+    document.getElementById('save-person').onclick = () => { const values={}; forms.querySelectorAll('[data-field]').forEach(el=>values[el.dataset.field]=el.value.trim()); if(!values.fullName) return showMessage('error','Ad Soyad boş olamaz.'); if(current) current.values=values; else project.participants.push({id:uid('p'),values,active:true,createdAt:nowISO()}); project.updatedAt=nowISO(); updateProject(project); render(); showMessage('success',current?'Kişi güncellendi.':'Kişi eklendi.'); };
+  }
+  document.getElementById('add-participant-toggle').onclick = () => renderAddPersonForm();
+  document.getElementById('bulk-import-toggle').onclick = () => { forms.innerHTML=`<div class="card" style="margin-bottom:18px;"><div class="section-title" style="margin-top:0;">Toplu Kişi Ekle</div><p class="small muted">Her satıra bir kişi: Ad Soyad, Cinsiyet</p><textarea id="bulk-text" class="textarea" style="min-height:150px;" placeholder="Ali Yılmaz, Erkek&#10;Ayşe Kaya, Kadın"></textarea><div class="row" style="margin-top:12px;"><button class="btn btn-primary" id="save-bulk">Ekle</button><button class="btn" id="cancel-bulk">İptal</button></div><div id="bulk-result" style="margin-top:10px;"></div></div>`; document.getElementById('cancel-bulk').onclick=()=>forms.innerHTML=''; document.getElementById('save-bulk').onclick=()=>{ const lines=document.getElementById('bulk-text').value.split('\n').map(l=>l.trim()).filter(Boolean); let added=0; for(const line of lines){const parts=line.split(',').map(s=>s.trim());const fullName=parts[0];if(!fullName)continue;project.participants.push({id:uid('p'),values:{fullName,gender:parts[1]||''},active:true,createdAt:nowISO()});added++;} project.updatedAt=nowISO();updateProject(project); document.getElementById('bulk-result').innerHTML='<div class="success">'+added+' kişi eklendi.</div>'; setTimeout(()=>render(),1200); }; };
+  document.getElementById('sort-participants-toggle').onclick = () => { project.participants.sort((a,b)=>(a.values.fullName||'').localeCompare(b.values.fullName||'','tr')); project.updatedAt=nowISO();updateProject(project);render(); };
+  document.querySelectorAll('[data-remove-participant]').forEach(btn => btn.onclick = () => { if(!confirm('Bu kişiyi silmek istediğine emin misin?')) return; const p=project.participants.find(x=>x.id===btn.dataset.removeParticipant); if(p) p.active=false; project.updatedAt=nowISO(); updateProject(project); render(); });
+  document.querySelectorAll('[data-edit-participant]').forEach(btn => btn.onclick = () => renderAddPersonForm(btn.dataset.editParticipant));
+}
+
+
+function renderQuestionsPage(project) {
+  const socioQs = project.questions.filter(q => !['pulse-scale','pulse-yesno','pulse-text'].includes(q.category));
+  const pulseQs = project.questions.filter(q => ['pulse-scale','pulse-yesno','pulse-text'].includes(q.category));
+
+  const PULSE_DIM_LABELS = {
+    'psikolojik-guvenlik':'Psikolojik Güvenlik','motivasyon':'Motivasyon',
+    'is-yuku':'İş Yükü','takim-uyumu':'Takım Uyumu',
+    'yonetici-iliskisi':'Yönetici İlişkisi','genel':'Genel'
+  };
+
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Ölçek</h2>
+        <p class="page-subtitle">Sosyometrik sorular + Pulse soruları tek formda.</p>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" id="add-question-toggle">+ Sosyometrik Soru</button>
+        <button class="btn" style="background:var(--pulse);color:white;border-color:var(--pulse);" id="add-pulse-toggle">💜 Pulse Sorusu</button>
+      </div>
+    </div>
+    ${renderMessages()}
+    <div id="question-form-slot"></div>
+
+    <!-- Sosyometrik sorular -->
+    <div class="section-title" style="color:var(--accent);">📊 SOSYOMETRİK SORULAR (${socioQs.length})</div>
+    ${socioQs.length ? `
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+        ${socioQs.map((q,idx) => `
+          <div class="question-card">
+            <div class="split">
+              <div><h4>${idx+1}. ${esc(q.title)}</h4><p>${esc(q.description||'Açıklama yok.')}</p></div>
+              <span class="badge ${q.category==='seçim'?'badge-ok':'badge-danger'}">${esc(q.category)}</span>
+            </div>
+            <div class="row small muted" style="margin-bottom:12px;">
+              <span>Min: ${q.min}</span><span>Max: ${q.max}</span>
+              <span>${q.required?'Zorunlu':'Opsiyonel'}</span>
+            </div>
+            <div class="row">
+              <button class="btn btn-soft" data-edit-question="${q.id}">Düzenle</button>
+              <button class="btn btn-danger" data-delete-question="${q.id}">Sil</button>
+            </div>
+          </div>`).join('')}
+      </div>` : `
+      <div class="empty" style="padding:24px;">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">Sosyometrik soru yok</div>
+        <div class="empty-desc">+ Sosyometrik Soru butonuyla ekle.</div>
+      </div>`}
+
+    <!-- Pulse sorular -->
+    <div class="section-title" style="color:var(--pulse);">💜 PULSE SORULARI (${pulseQs.length})</div>
+    ${pulseQs.length ? `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${pulseQs.map((q,idx) => `
+          <div class="question-card" style="border-left:4px solid var(--pulse);">
+            <div class="split">
+              <div>
+                <h4>${idx+1}. ${esc(q.title)}</h4>
+                <p>${esc(q.description||'')}</p>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <span class="badge" style="background:var(--pulse-soft);color:var(--pulse);">
+                  ${q.category==='pulse-scale'?`Likert 1–${q.pulseMax||5}`:q.category==='pulse-yesno'?'Evet/Hayır':'Açık Metin'}
+                </span>
+                ${q.pulseDimension?`<span class="badge badge-soft">${esc(PULSE_DIM_LABELS[q.pulseDimension]||q.pulseDimension)}</span>`:''}
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn btn-soft" data-edit-pulse="${q.id}">Düzenle</button>
+              <button class="btn btn-danger" data-delete-question="${q.id}">Sil</button>
+            </div>
+          </div>`).join('')}
+      </div>` : `
+      <div class="empty" style="padding:24px;">
+        <div class="empty-icon">💜</div>
+        <div class="empty-title">Pulse sorusu yok</div>
+        <div class="empty-desc">💜 Pulse Sorusu butonuyla motivasyon, psikolojik güvenlik gibi boyutları ölç.</div>
+      </div>`}
+  `;
+}
+
+function bindQuestionsPage(project) {
+  const slot = document.getElementById('question-form-slot');
+
+  const PULSE_DIMS = [
+    {key:'psikolojik-guvenlik',label:'Psikolojik Güvenlik'},
+    {key:'motivasyon',label:'Motivasyon'},
+    {key:'is-yuku',label:'İş Yükü'},
+    {key:'takim-uyumu',label:'Takım Uyumu'},
+    {key:'yonetici-iliskisi',label:'Yönetici İlişkisi'},
+    {key:'genel',label:'Genel'}
+  ];
+
+  const HAZIR_SORULAR = [
+    {text:'Bu hafta işim anlamlı hissettirdi.',dim:'motivasyon'},
+    {text:'Fikirlerimi rahatça paylaşabiliyorum.',dim:'psikolojik-guvenlik'},
+    {text:'Bu hafta iş yükü altında ezildim.',dim:'is-yuku'},
+    {text:'Takımımla iyi işbirliği yaptım.',dim:'takim-uyumu'},
+    {text:'Yöneticimden yeterli destek gördüm.',dim:'yonetici-iliskisi'},
+    {text:'Genel iyi oluş halim iyiydi.',dim:'genel'},
+  ];
+
+  // Sosyometrik soru formu
+  function showSocioForm(editId=null) {
+    const q = editId ? project.questions.find(x=>x.id===editId)
+                     : {title:'',description:'',category:'seçim',min:0,max:3,required:true};
+    slot.innerHTML = `
+      <div class="card" style="margin-bottom:18px;border-left:4px solid var(--accent);">
+        <div class="section-title" style="margin-top:0;color:var(--accent);">
+          ${editId ? '✏️ Soruyu Düzenle' : '+ Yeni Sosyometrik Soru'}
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Başlık</label><input id="q-title" class="input" value="${esc(q.title)}"></div>
+          <div class="field"><label>Kategori</label>
+            <select id="q-category" class="select">
+              <option value="seçim" ${q.category==='seçim'?'selected':''}>Seçim</option>
+              <option value="itme" ${q.category==='itme'?'selected':''}>İtme</option>
+              <option value="algılanan-seçim" ${q.category==='algılanan-seçim'?'selected':''}>Algılanan Seçim</option>
+              <option value="algılanan-itme" ${q.category==='algılanan-itme'?'selected':''}>Algılanan İtme</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>Açıklama</label>
+          <textarea id="q-desc" class="textarea">${esc(q.description||'')}</textarea>
+        </div>
+        <div class="grid-3" style="margin-top:14px;">
+          <div class="field"><label>Min</label><input id="q-min" class="input" type="number" value="${q.min}"></div>
+          <div class="field"><label>Max</label><input id="q-max" class="input" type="number" value="${q.max}"></div>
+          <div class="field"><label>Zorunlu</label>
+            <select id="q-required" class="select">
+              <option value="true" ${q.required?'selected':''}>Evet</option>
+              <option value="false" ${!q.required?'selected':''}>Hayır</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <button class="btn btn-primary" id="save-question">Kaydet</button>
+          <button class="btn" id="cancel-question">İptal</button>
+        </div>
+      </div>`;
+
+    document.getElementById('cancel-question').onclick = () => slot.innerHTML = '';
+    document.getElementById('save-question').onclick = () => {
+      const payload = {
+        title: document.getElementById('q-title').value.trim(),
+        description: document.getElementById('q-desc').value.trim(),
+        category: document.getElementById('q-category').value,
+        min: Number(document.getElementById('q-min').value||0),
+        max: Number(document.getElementById('q-max').value||0),
+        required: document.getElementById('q-required').value==='true'
+      };
+      if (!payload.title) return showMessage('error','Soru başlığı boş olamaz.');
+      if (editId) Object.assign(project.questions.find(x=>x.id===editId), payload);
+      else project.questions.push({id:uid('q'),...payload,order:project.questions.length+1,createdAt:nowISO()});
+      project.updatedAt=nowISO(); updateProject(project); render();
+      showMessage('success', editId?'Soru güncellendi.':'Soru eklendi.');
+    };
+  }
+
+  // Pulse soru formu
+  function showPulseForm(editId=null) {
+    const q = editId ? project.questions.find(x=>x.id===editId)
+                     : {title:'',description:'',category:'pulse-scale',pulseMax:5,pulseDimension:'motivasyon',required:false};
+
+    slot.innerHTML = `
+      <div class="card" style="margin-bottom:18px;border-left:4px solid var(--pulse);">
+        <div class="section-title" style="margin-top:0;color:var(--pulse);">
+          ${editId ? '✏️ Pulse Sorusunu Düzenle' : '💜 Yeni Pulse Sorusu'}
+        </div>
+
+        <!-- Hazır sorular -->
+        <div style="margin-bottom:16px;padding:12px;background:var(--pulse-soft);border-radius:10px;">
+          <div style="font-size:11px;font-weight:800;color:var(--pulse);margin-bottom:8px;">HAZIR SORULAR — Tıkla otomatik doldur</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${HAZIR_SORULAR.map(s => `
+              <button type="button" class="btn btn-soft" style="font-size:12px;padding:5px 10px;"
+                data-hs-text="${esc(s.text)}" data-hs-dim="${s.dim}">
+                ${esc(s.text.slice(0,32))}…
+              </button>`).join('')}
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Soru Metni</label>
+            <input id="pq-title" class="input" value="${esc(q.title)}" placeholder="örn: Bu hafta işim anlamlı hissettirdi.">
+          </div>
+          <div class="field">
+            <label>Boyut</label>
+            <select id="pq-dim" class="select">
+              ${PULSE_DIMS.map(d=>`<option value="${d.key}" ${(q.pulseDimension||'motivasyon')===d.key?'selected':''}>${d.label}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px;">
+          <div class="field">
+            <label>Soru Tipi</label>
+            <select id="pq-cat" class="select">
+              <option value="pulse-scale" ${q.category==='pulse-scale'?'selected':''}>Likert Ölçeği (1-5 veya 1-10)</option>
+              <option value="pulse-yesno" ${q.category==='pulse-yesno'?'selected':''}>Evet / Hayır</option>
+              <option value="pulse-text"  ${q.category==='pulse-text'?'selected':''}>Açık Metin</option>
+            </select>
+          </div>
+          <div class="field" id="pq-max-wrap">
+            <label>Ölçek Maks.</label>
+            <select id="pq-max" class="select">
+              <option value="5"  ${(q.pulseMax||5)===5?'selected':''}>1 – 5</option>
+              <option value="10" ${(q.pulseMax||5)===10?'selected':''}>1 – 10</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+          <label>Alt metin <span style="font-weight:400;font-size:11px;">(isteğe bağlı)</span></label>
+          <input id="pq-desc" class="input" value="${esc(q.description||'')}"
+            placeholder="örn: 1 = Hiç katılmıyorum, 5 = Tamamen katılıyorum">
+        </div>
+
+        <div class="row" style="margin-top:16px;">
+          <button class="btn" style="background:var(--pulse);color:white;border-color:var(--pulse);" id="save-pulse-q">Kaydet</button>
+          <button class="btn" id="cancel-pulse-q">İptal</button>
+        </div>
+      </div>`;
+
+    // Hazır soru tıklama
+    slot.querySelectorAll('[data-hs-text]').forEach(btn => {
+      btn.onclick = () => {
+        document.getElementById('pq-title').value = btn.dataset.hsText;
+        document.getElementById('pq-dim').value   = btn.dataset.hsDim;
+      };
+    });
+
+    // Tip değişince max göster/gizle
+    const catSel = document.getElementById('pq-cat');
+    const maxWrap = document.getElementById('pq-max-wrap');
+    function toggleMax() { maxWrap.style.display = catSel.value==='pulse-scale' ? '' : 'none'; }
+    catSel.onchange = toggleMax;
+    toggleMax();
+
+    document.getElementById('cancel-pulse-q').onclick = () => slot.innerHTML = '';
+    document.getElementById('save-pulse-q').onclick = () => {
+      const title = document.getElementById('pq-title').value.trim();
+      if (!title) return showMessage('error','Soru metni boş olamaz.');
+      const payload = {
+        title,
+        description: document.getElementById('pq-desc').value.trim(),
+        category:    document.getElementById('pq-cat').value,
+        pulseDimension: document.getElementById('pq-dim').value,
+        pulseMax:    parseInt(document.getElementById('pq-max')?.value || 5),
+        min:0, max:0, required:false
+      };
+      if (editId) Object.assign(project.questions.find(x=>x.id===editId), payload);
+      else project.questions.push({id:uid('q'),...payload,order:project.questions.length+1,createdAt:nowISO()});
+      project.updatedAt=nowISO(); updateProject(project); render();
+      showMessage('success', editId?'Pulse sorusu güncellendi.':'Pulse sorusu eklendi.');
+    };
+  }
+
+  // Buton bağlamaları
+  document.getElementById('add-question-toggle').onclick = () => showSocioForm();
+  document.getElementById('add-pulse-toggle').onclick    = () => showPulseForm();
+
+  document.querySelectorAll('[data-edit-question]').forEach(btn =>
+    btn.onclick = () => showSocioForm(btn.dataset.editQuestion));
+
+  document.querySelectorAll('[data-edit-pulse]').forEach(btn =>
+    btn.onclick = () => showPulseForm(btn.dataset.editPulse));
+
+  document.querySelectorAll('[data-delete-question]').forEach(btn =>
+    btn.onclick = () => {
+      if (!confirm('Soruyu silmek istediğine emin misin?')) return;
+      project.questions = project.questions.filter(q => q.id !== btn.dataset.deleteQuestion);
+      project.responses.forEach(r => r.answers = r.answers.filter(a => a.questionId !== btn.dataset.deleteQuestion));
+      project.updatedAt=nowISO(); updateProject(project); render();
+    });
+}
+
+function matchParticipantByName(participants, rawName) {
+  const norm = normalizeTR(rawName); if(!norm) return null;
+  let exact = participants.find(p => normalizeTR(p.values.fullName) === norm); if(exact) return exact;
+  let inc = participants.find(p => normalizeTR(p.values.fullName).includes(norm) || norm.includes(normalizeTR(p.values.fullName))); if(inc) return inc;
+  const tt = norm.split(' ').filter(Boolean); let best=null,bestScore=0;
+  for(const p of participants){const pn=normalizeTR(p.values.fullName);const tokens=pn.split(' ').filter(Boolean);let score=0;for(const t of tt)if(tokens.includes(t))score++;if(score>bestScore){bestScore=score;best=p;}}
+  return bestScore>=Math.min(2,tt.length)?best:null;
+}
+function importWorkbookIntoProject(project, fileName, workbook) {
+  const sheetName=workbook.SheetNames[0];const sheet=workbook.Sheets[sheetName];const rows=XLSX.utils.sheet_to_json(sheet,{defval:'',raw:false});
+  if(!rows.length) throw new Error('Excel içinde veri bulunamadı.');
+  const headers=Object.keys(rows[0]);const participantHeaders=headers.filter(h=>!questionLike(h)&&!/Zaman damgası/i.test(h)&&!/beklent/i.test(h));const questionHeaders=headers.filter(h=>questionLike(h));
+  if(!participantHeaders.some(h=>/ad/i.test(h)&&/soyad/i.test(h))) throw new Error('Ad Soyad sütunu bulunamadı.');
+  if(!questionHeaders.length) throw new Error('Sosyometrik soru sütunu bulunamadı.');
+  const headerToKey=new Map();const seenFieldKeys=new Set();
+  for(const h of participantHeaders){let key=inferFieldKey(h);if(seenFieldKeys.has(key)){let suffix=2;while(seenFieldKeys.has(key+'_'+suffix))suffix++;key=key+'_'+suffix;}seenFieldKeys.add(key);headerToKey.set(h,key);}
+  const fields=[];for(const h of participantHeaders){const key=headerToKey.get(h);if(key==='fullName')continue;fields.push({key,label:h,type:'text',required:false});}
+  project.schema.requiredFields=[{key:'fullName',label:'Ad Soyad',type:'text',required:true},{key:'gender',label:'Cinsiyet',type:'select',required:false,options:['Kadın','Erkek']}];project.schema.customFields=fields;
+  project.participants=rows.map((row,idx)=>{const values={fullName:'',gender:''};for(const h of participantHeaders){const key=headerToKey.get(h);values[key]=String(row[h]??'').trim();if(key==='fullName')values.fullName=String(row[h]??'').trim();}return{id:uid('p'),values,active:true,createdAt:nowISO(),_rowIndex:idx};}).filter(p=>p.values.fullName);
+  project.questions=questionHeaders.map((h,idx)=>{const max=Math.max(1,...rows.map(r=>splitNames(r[h]).length),3);return{id:uid('q'),category:inferQuestionCategory(h),title:h,description:"Excel'den otomatik alındı",min:0,max,required:false,order:idx+1,createdAt:nowISO()};});
+  const unmatchedNames=[];
+  project.responses=rows.map((row)=>{const respondentNameHeader=participantHeaders.find(h=>/ad/i.test(h)&&/soyad/i.test(h));const respondentName=String(row[respondentNameHeader]??'').trim();const respondent=matchParticipantByName(project.participants,respondentName);const answers=project.questions.map((q,i)=>{const rawSelections=splitNames(row[questionHeaders[i]]);const selectedIds=[];for(const rawName of rawSelections){const target=matchParticipantByName(project.participants,rawName);if(target)selectedIds.push(target.id);else unmatchedNames.push({respondent:respondentName,question:q.title,rawName});}return{questionId:q.id,selectedIds:[...new Set(selectedIds)]};});return{id:uid('r'),googleResponseId:null,submittedAt:(()=>{const v=row['Zaman damgası'];if(!v)return nowISO();const d=new Date(v);return isNaN(d.getTime())?nowISO():d.toISOString();})(),respondentId:respondent?respondent.id:null,answers,edited:false,editedAt:null,editedFields:[],status:respondent?'valid':'pending'};});
+  project.analysis={calculatedAt:null,relations:[],personMetrics:[],groupMetrics:null,unmatchedNames,pulseMetrics:null};project.importInfo={fileName,sheetName,importedAt:nowISO(),rowCount:rows.length,participantHeaders,questionHeaders};project.updatedAt=nowISO();updateProject(project);
+  return{rowCount:rows.length,questionCount:project.questions.length,participantCount:project.participants.length,unmatchedNames};
+}
+
+function renderResponsesPage(project) {
+  const responses = project.responses || [];
+  const pending = responses.filter(r => !r.respondentId || r.status === 'pending');
+  const PULSE_CATS = ['pulse-scale','pulse-yesno','pulse-text'];
+  const pulseQs = project.questions.filter(q => PULSE_CATS.includes(q.category));
+  const socioQs = project.questions.filter(q => !PULSE_CATS.includes(q.category));
+  const hasPulse = pulseQs.length > 0;
+
+  return `
+    <div class="page-header">
+      <div><h2 class="page-title">Yanıtlar</h2>
+      <p class="page-subtitle">${responses.length} yanıt · ${pending.length} eşleşmemiş · ${socioQs.length} sosyo soru${hasPulse ? ` · ${pulseQs.length} pulse soru` : ''}</p></div>
+    </div>
+    ${renderMessages()}
+    ${pending.length
+      ? `<div class="notice" style="margin-bottom:16px;">⚠ ${pending.length} yanıt eşleşmemiş.</div>`
+      : '<div class="success" style="margin-bottom:16px;">✓ Tüm yanıtlar eşleşmiş.</div>'}
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>#</th><th>Yanıtlayan</th><th>Tarih</th><th>Durum</th>
+        <th>Sosyo Seçim</th>
+        ${hasPulse ? `<th style="color:var(--pulse);">💜 Pulse</th>` : ''}
+        <th>İşlem</th>
+      </tr></thead>
+      <tbody>
+      ${responses.map((r,i) => {
+        const p = project.participants.find(x => x.id === r.respondentId);
+        const totalSocio = r.answers
+          .filter(a => socioQs.some(q => q.id === a.questionId))
+          .reduce((s,a) => s + (a.selectedIds||[]).length, 0);
+        const pulseAnswered = pulseQs.filter(q => {
+          const ans = (r.answers||[]).find(a => a.questionId === q.id);
+          return ans && (ans.numericValue !== undefined && ans.numericValue !== null || ans.textValue);
+        }).length;
+
+        return `<tr>
+          <td class="small muted">${i+1}</td>
+          <td>${p ? esc(p.values.fullName||'') : '<span style="color:var(--danger)">Eşleşmedi</span>'}</td>
+          <td class="small muted">${formatDate(r.submittedAt)}</td>
+          <td><span class="badge ${r.status==='valid'?'badge-ok':r.status==='excluded'?'badge-danger':'badge-soft'}">${r.status==='valid'?'Geçerli':r.status==='excluded'?'Dışlandı':'Beklemede'}</span></td>
+          <td class="small">${totalSocio} seçim</td>
+          ${hasPulse ? `<td class="small">
+            ${pulseAnswered > 0
+              ? `<span style="color:var(--pulse);font-weight:700;">${pulseAnswered}/${pulseQs.length}</span>`
+              : `<span style="color:var(--muted);">—</span>`}
+          </td>` : ''}
+          <td><div class="row">
+            <select class="select" style="font-size:12px;padding:4px 8px;" data-assign-response="${r.id}">
+              <option value="">-- Kişi Ata --</option>
+              ${project.participants.filter(p=>p.active).map(p=>`<option value="${p.id}" ${r.respondentId===p.id?'selected':''}>${esc(p.values.fullName||p.id)}</option>`).join('')}
+            </select>
+            <button class="btn btn-soft" style="font-size:12px;padding:4px 8px;" data-toggle-exclude="${r.id}">${r.status==='excluded'?'Dahil Et':'Dışla'}</button>
+            <button class="btn btn-danger" style="font-size:12px;padding:4px 8px;" data-delete-response="${r.id}">Sil</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table></div>`;
+}
+function bindResponsesPage(project) {
+  document.querySelectorAll('[data-assign-response]').forEach(sel=>{sel.onchange=()=>{const r=project.responses.find(x=>x.id===sel.dataset.assignResponse);if(r){r.respondentId=sel.value||null;r.status=sel.value?'valid':'pending';}project.updatedAt=nowISO();updateProject(project);render();};});
+  document.querySelectorAll('[data-toggle-exclude]').forEach(btn=>{btn.onclick=()=>{const r=project.responses.find(x=>x.id===btn.dataset.toggleExclude);if(r)r.status=r.status==='excluded'?'valid':'excluded';project.updatedAt=nowISO();updateProject(project);render();};});
+  document.querySelectorAll('[data-delete-response]').forEach(btn=>{btn.onclick=()=>{if(!confirm('Bu yanıtı silmek istediğine emin misin?'))return;project.responses=project.responses.filter(x=>x.id!==btn.dataset.deleteResponse);project.updatedAt=nowISO();updateProject(project);render();};});
+}
+
+function renderExcelPage(project) {
+  const info=project.importInfo;const validCount=project.responses.filter(r=>r.status==='valid').length;
+  return `<div class="page-header"><div><h2 class="page-title">Veri Aktar</h2><p class="page-subtitle">Excel'den kişi, soru ve yanıt verilerini içe aktar.</p></div></div>
+  ${renderMessages()}
+  <div class="card" style="margin-bottom:18px;"><div class="field"><label>.xlsx dosyası</label><input id="excel-file" class="input" type="file" accept=".xlsx,.xls"/></div><div class="row" style="margin-top:14px;"><button class="btn btn-primary" id="import-excel">Excel'i İçeri Al</button><button class="btn" id="run-analysis-after-import">İçeri Al + Analizi Çalıştır</button></div></div>
+  ${info?`<div class="card" style="margin-bottom:18px;"><div class="section-title">Son İçeri Aktarım</div><div class="grid-2"><div><strong>Dosya:</strong> ${esc(info.fileName)}</div><div><strong>Satır:</strong> ${info.rowCount}</div><div><strong>Geçerli yanıt:</strong> ${validCount}</div><div><strong>Tarih:</strong> ${esc(formatDate(info.importedAt))}</div></div></div>`:''}
+  ${project.analysis?.unmatchedNames?.length?`<div class="card warning"><strong>Eşleşmeyen isimler:</strong><ul class="match-list">${project.analysis.unmatchedNames.slice(0,25).map(x=>`<li>${esc(x.respondent)} → ${esc(x.rawName)}</li>`).join('')}</ul></div>`:''}
+  <div class="notice">Beklenen yapı: Ad Soyad + diğer kişi sütunları + sosyometrik soru sütunları.</div>`;
+}
+function bindExcelPage(project) {
+  async function run(doAnalysis) { const input=document.getElementById('excel-file');const file=input.files[0];if(!file) return showMessage('error','Önce Excel dosyasını seç.'); try{const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});const result=importWorkbookIntoProject(project,file.name,wb);if(doAnalysis)runAnalysis(project);render();showMessage('success',`Excel içeri alındı. ${result.participantCount} kişi · ${result.questionCount} soru.`);}catch(err){showMessage('error',err.message||'Excel içeri alınamadı.');} }
+  document.getElementById('import-excel').onclick=()=>run(false);
+  document.getElementById('run-analysis-after-import').onclick=()=>run(true);
+}
+
+
+function renderAnalysisPage(project) {
+  const an = project.analysis;
+  const gm = an.groupMetrics;
+  const metrics = an.personMetrics || [];
+  const pm = an.pulseMetrics || null;
+  const hasPulse = project.questions.some(q => q.category === 'pulse-scale' || q.category === 'pulse-yesno' || q.category === 'pulse-text');
+  const tab = ui.analysisTab || 'sosyo';
+
+  const tabBar = `
+    <div style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:20px;">
+      <button data-atab="sosyo" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;border-bottom:3px solid ${tab==='sosyo'?'var(--accent)':'transparent'};color:${tab==='sosyo'?'var(--accent)':'var(--muted)'};margin-bottom:-2px;">📊 Sosyometri</button>
+      ${hasPulse ? `<button data-atab="pulse" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;border-bottom:3px solid ${tab==='pulse'?'var(--pulse)':'transparent'};color:${tab==='pulse'?'var(--pulse)':'var(--muted)'};margin-bottom:-2px;">💜 Pulse Survey</button>` : ''}
+    </div>`;
+
+  return `
+    <div class="page-header">
+      <div><h2 class="page-title">Analiz</h2><p class="page-subtitle">${project.responses.filter(r=>r.status!=='invalid'&&r.status!=='excluded').length} geçerli yanıt · ${project.participants.filter(p=>p.active).length} katılımcı</p></div>
+      <div class="row" style="align-items:center;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" id="rank-weight-toggle" style="width:16px;height:16px;">Seçim sırası ağırlıklı</label>
+        <button class="btn btn-primary" id="run-analysis">Analizi Çalıştır</button>
+      </div>
+    </div>
+    ${renderMessages()}
+    ${!an.calculatedAt ? `<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Analiz bekleniyor</div><div class="empty-desc">Yanıtlar yüklendikten sonra "Analizi Çalıştır" butonuna bas.</div></div>` : `
+      ${tabBar}
+      ${tab === 'sosyo' ? renderSosyoTab(project, gm, metrics) : renderPulseTab(project, pm)}
+    `}`;
+}
+
+function renderSosyoTab(project, gm, metrics) {
+  // Orijinal analiz içeriği — hiçbir şey değişmedi
+  return `
+    <div class="notice">Son hesaplama: ${esc(formatDate(project.analysis.calculatedAt))}</div>
+    <div class="stats">
+      <div class="card"><div class="muted" style="font-size:12px;">🎯 Katılım Oranı</div><div class="stat-value" style="color:var(--accent)">${gm?Math.round(gm.participationRate*100):0}%</div><div class="small muted">${gm?gm.totalRespondents+'/'+gm.totalParticipants+' kişi':''}</div></div>
+      <div class="card"><div class="muted" style="font-size:12px;">🕸 Ağ Yoğunluğu</div><div class="stat-value">${gm?gm.networkDensity:0}%</div></div>
+      <div class="card"><div class="muted" style="font-size:12px;">🔄 Karş. Seçim</div><div class="stat-value" style="color:var(--ok)">${gm?gm.mutualRate:0}%</div></div>
+      <div class="card"><div class="muted" style="font-size:12px;">⭐ Yıldız</div><div class="stat-value" style="color:var(--ok)">${gm?(gm.stars?.length||0):0}</div></div>
+      <div class="card"><div class="muted" style="font-size:12px;">🔴 Tam İzole</div><div class="stat-value" style="color:var(--warning)">${gm?(gm.fullyIsolated?.length||0):0}</div></div>
+      <div class="card"><div class="muted" style="font-size:12px;">🟡 Tek Yönlü</div><div class="stat-value" style="color:var(--warning)">${gm?(gm.oneWayIsolated?.length||0):0}</div></div>
+    </div>
+    ${gm?.genderStats&&Object.keys(gm.genderStats).length?`<div class="grid-3" style="margin-bottom:20px;"><div class="card"><div class="section-title" style="margin-top:0;">Cinsiyet Bazlı Seçimler</div>${Object.entries(gm.genderStats).map(([k,v])=>`<div class="split" style="padding:5px 0;border-bottom:1px solid #edf2f7;"><span>${esc(k)}</span><span class="badge badge-soft">${v}</span></div>`).join('')}</div><div class="card"><div class="section-title" style="margin-top:0;">Alt Gruplar</div>${gm.cliques?.length?gm.cliques.map((g,i)=>`<div style="padding:5px 0;border-bottom:1px solid #edf2f7;"><span class="badge badge-soft">Grup ${i+1}</span><div class="small">${g.map(id=>esc(participantName(project,id))).join(' · ')}</div></div>`).join(''):'<div class="muted small">Yok</div>'}</div><div class="card"><div class="section-title" style="margin-top:0;">Katılmayanlar</div>${gm.nonRespondents?.length?gm.nonRespondents.map(id=>`<div style="padding:5px 0;border-bottom:1px solid #edf2f7;font-size:13px;">${esc(participantName(project,id))}</div>`).join(''):'<div class="small" style="color:var(--ok)">✓ Herkes katıldı</div>'}</div></div>`:''}
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="card"><div class="section-title" style="margin-top:0;">En Çok Seçilen</div>${gm&&gm.mostChosen.length?gm.mostChosen.map(id=>`<div class="split" style="padding:6px 0;border-bottom:1px solid #edf2f7;"><span>${esc(participantName(project,id))}</span><span class="badge badge-ok">${metrics.find(x=>x.participantId===id)?.receivedChoices||0}</span></div>`).join(''):'<div class="muted">Veri yok</div>'}</div>
+      <div class="card"><div class="section-title" style="margin-top:0;">En Çok İtilen</div>${gm&&gm.mostRejected.length?gm.mostRejected.map(id=>`<div class="split" style="padding:6px 0;border-bottom:1px solid #edf2f7;"><span>${esc(participantName(project,id))}</span><span class="badge badge-danger">${metrics.find(x=>x.participantId===id)?.receivedRejections||0}</span></div>`).join(''):'<div class="muted">Veri yok</div>'}</div>
+      <div class="card"><div class="section-title" style="margin-top:0;">Karşılıklı Seçimler</div>${gm&&gm.mutualChoicePairs.length?gm.mutualChoicePairs.map(pair=>`<div style="padding:6px 0;border-bottom:1px solid #edf2f7;">${esc(participantName(project,pair[0]))} ↔ ${esc(participantName(project,pair[1]))}</div>`).join(''):'<div class="muted">Yok</div>'}</div>
+    </div>
+    ${gm?.autoSummary?.length?`<div class="card" style="margin-bottom:20px;background:var(--accent-soft);border-color:var(--accent);"><div class="section-title" style="margin-top:0;color:var(--accent);">OTOMATİK ÖZET</div>${gm.autoSummary.map(s=>'<div style="font-size:14px;padding:3px 0;border-bottom:1px solid var(--border);">• '+esc(s)+'</div>').join('')}</div>`:''}
+    <div class="table-wrap"><table><thead><tr><th>Kişi</th><th>Seçildi</th><th>İtildi</th><th>Seçti</th><th>İtti</th><th>Karş.Seçim</th><th>Net</th><th>SSS</th><th>Durum</th></tr></thead><tbody>
+    ${[...metrics].sort((a,b)=>b.receivedChoices-a.receivedChoices).map(m=>`<tr><td><strong>${esc(participantName(project,m.participantId))}</strong></td><td style="color:var(--ok);font-weight:700;">${m.receivedChoices}</td><td style="color:var(--danger);font-weight:700;">${m.receivedRejections}</td><td>${m.sentChoices}</td><td>${m.sentRejections}</td><td>${m.mutualChoices}</td><td style="font-weight:700;color:${(m.netScore||0)>=0?'var(--ok)':'var(--danger)'}">${(m.netScore||0)>0?'+':''}${m.netScore||0}</td><td style="font-weight:700;color:${(m.sss||0)>=0?'var(--ok)':'var(--danger)'}">${(m.sss||0)>0?'+':''}${m.sss||0}</td><td><span style="font-size:11px;background:${m.isolationType==='tam'?'var(--warning-soft)':m.isolationType==='tek-yonlu'?'var(--warning-soft)':(m.sss||0)>=0.3&&(m.receivedRejections||0)<=1?'var(--ok-soft)':'var(--surface2)'};color:${m.isolationType==='tam'?'var(--warning)':m.isolationType==='tek-yonlu'?'var(--warning)':(m.sss||0)>=0.3&&(m.receivedRejections||0)<=1?'var(--ok)':'var(--muted)'};padding:2px 7px;border-radius:99px;">${m.isolationType==='tam'?'Tam İzole':m.isolationType==='tek-yonlu'?'Tek Yönlü':(m.sss||0)>=0.3&&(m.receivedRejections||0)<=1?'⭐ Yıldız':''}</span></td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function renderPulseTab(project, pm) {
+  const PULSE_DIM_LABELS = {
+    'psikolojik-guvenlik': 'Psikolojik Güvenlik',
+    'motivasyon': 'Motivasyon',
+    'is-yuku': 'İş Yükü',
+    'takim-uyumu': 'Takım Uyumu',
+    'yonetici-iliskisi': 'Yönetici İlişkisi',
+    'genel': 'Genel'
+  };
+  const metrics = project.analysis.personMetrics || [];
+  const active = project.participants.filter(p => p.active);
+  const pulseQs = project.questions.filter(q =>
+    q.category === 'pulse-scale' || q.category === 'pulse-yesno' || q.category === 'pulse-text'
+  );
+
+  if (!pulseQs.length) {
+    return `<div class="empty"><div class="empty-icon">💜</div><div class="empty-title">Pulse sorusu yok</div><div class="empty-desc">Henüz pulse sorusu eklenmemiş. Ölçek sayfasından pulse sorusu ekleyebilirsin.</div></div>`;
+  }
+
+  // Soru bazlı istatistikler
+  const validResps = project.responses.filter(r => r.respondentId && r.status !== 'excluded' && r.status !== 'invalid');
+
+  const qStats = pulseQs.map(q => {
+    const answers = validResps.map(r => {
+      const ans = (r.answers || []).find(a => a.questionId === q.id);
+      return ans?.numericValue ?? null;
+    }).filter(v => v !== null);
+    const avg = answers.length ? answers.reduce((s, v) => s + v, 0) / answers.length : null;
+    const maxVal = q.pulseMax || 5;
+    return { q, answers, avg, maxVal, pct: avg !== null ? Math.round((avg / maxVal) * 100) : null };
+  });
+
+  // Boyut ortalamaları
+  const dimMap = {};
+  for (const { q, avg, maxVal } of qStats) {
+    if (avg === null || q.category !== 'pulse-scale') continue;
+    const dim = q.pulseDimension || 'genel';
+    if (!dimMap[dim]) dimMap[dim] = [];
+    dimMap[dim].push(Math.round((avg / maxVal) * 100));
+  }
+  const dimAvgs = Object.entries(dimMap).map(([dim, vals]) => ({
+    dim,
+    label: PULSE_DIM_LABELS[dim] || dim,
+    avg: Math.round(vals.reduce((s, v) => s + v, 0) / vals.length)
+  })).sort((a, b) => a.avg - b.avg);
+
+  // Kişi bazlı pulse skorları
+  const personScores = active.map(p => {
+    const resp = validResps.find(r => r.respondentId === p.id);
+    if (!resp) return { p, score: null };
+    const scores = [];
+    for (const q of pulseQs.filter(q => q.category === 'pulse-scale')) {
+      const ans = (resp.answers || []).find(a => a.questionId === q.id);
+      if (ans?.numericValue !== undefined) scores.push(Math.round((ans.numericValue / (q.pulseMax || 5)) * 100));
+    }
+    return { p, score: scores.length ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : null };
+  });
+
+  // Sosyo-Pulse 2x2 matrisi
+  const quadData = metrics.map(m => {
+    const ps = personScores.find(x => x.p.id === m.participantId);
+    return { m, score: ps?.score ?? null };
+  }).filter(d => d.score !== null);
+
+  const q1 = quadData.filter(d => d.m.sss >= 0 && d.score >= 60);   // Yıldız + İyi
+  const q2 = quadData.filter(d => d.m.sss >= 0 && d.score < 60);    // Yıldız + Düşük
+  const q3 = quadData.filter(d => d.m.sss < 0 && d.score >= 60);    // İzole + İyi
+  const q4 = quadData.filter(d => d.m.sss < 0 && d.score < 60);     // İzole + Düşük
+
+  function quadCard(title, desc, color, bg, people) {
+    return `<div style="background:${bg};border-radius:12px;padding:14px;border:1px solid ${color}44;">
+      <div style="font-weight:800;font-size:13px;color:${color};margin-bottom:4px;">${title}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${desc}</div>
+      ${people.length
+        ? people.map(d => `<div style="font-size:12px;padding:3px 0;border-bottom:1px solid ${color}22;">${esc(participantName(project, d.m.participantId))} <span style="color:${color};font-size:11px;">SSS:${d.m.sss > 0 ? '+' : ''}${d.m.sss} · Pulse:${d.score}</span></div>`).join('')
+        : `<div style="font-size:12px;color:var(--muted);">Bu kademede kimse yok</div>`}
+    </div>`;
+  }
+
+  return `
+    <!-- Pulse özet kutusu -->
+    ${dimAvgs.length ? `
+    <div class="card" style="margin-bottom:20px;border-left:4px solid var(--pulse);">
+      <div style="font-size:13px;font-weight:800;color:var(--pulse);margin-bottom:14px;">💜 BOYUT BAZLI ORTALAMALAR</div>
+      ${dimAvgs.map(({ label, avg }) => {
+        const color = avg >= 75 ? 'var(--ok)' : avg >= 50 ? 'var(--warning)' : 'var(--danger)';
+        return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div style="width:170px;font-size:13px;font-weight:600;flex-shrink:0;">${esc(label)}</div>
+          <div style="flex:1;height:8px;background:var(--surface2);border-radius:99px;">
+            <div style="width:${avg}%;height:100%;border-radius:99px;background:${color};transition:width .4s;"></div>
+          </div>
+          <div style="width:40px;text-align:right;font-size:13px;font-weight:800;color:${color};">${avg}%</div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <!-- Soru bazlı sonuçlar -->
+    <div class="section-title">SORU BAZLI SONUÇLAR</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+      ${qStats.map(({ q, answers, avg, maxVal, pct }) => {
+        const color = pct === null ? 'var(--muted)' : pct >= 75 ? 'var(--ok)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+        const dimLabel = PULSE_DIM_LABELS[q.pulseDimension] || '';
+        return `<div class="card" style="padding:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:12px;flex-wrap:wrap;">
+            <div>
+              <strong style="font-size:14px;">${esc(q.title)}</strong>
+              ${dimLabel ? `<span style="background:var(--pulse-soft);color:var(--pulse);padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;margin-left:8px;">${esc(dimLabel)}</span>` : ''}
+            </div>
+            ${avg !== null
+              ? `<div style="font-size:22px;font-weight:800;color:${color};">${avg.toFixed(1)}<span style="font-size:13px;color:var(--muted);"> / ${maxVal}</span></div>`
+              : '<div class="muted small">Veri yok</div>'}
+          </div>
+          ${pct !== null ? `
+          <div style="height:6px;background:var(--surface2);border-radius:99px;margin-bottom:6px;">
+            <div style="width:${pct}%;height:100%;border-radius:99px;background:${color};"></div>
+          </div>
+          <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);">
+            <span>Yanıt: ${answers.length}</span>
+            <span>Min: ${Math.min(...answers)}</span>
+            <span>Max: ${Math.max(...answers)}</span>
+          </div>` : ''}
+          ${q.category === 'pulse-yesno' && answers.length
+            ? `<div style="margin-top:6px;font-size:13px;">✓ Evet: ${answers.filter(v => v === 1).length} &nbsp; ✗ Hayır: ${answers.filter(v => v === 0).length}</div>`
+            : ''}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Kişi bazlı skorlar -->
+    <div class="section-title">KİŞİ BAZLI PULSE SKORLARI</div>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <table>
+        <thead><tr><th>Kişi</th><th>Pulse Skoru (0-100)</th><th>Durum</th><th>Sosyo SSS</th></tr></thead>
+        <tbody>
+          ${personScores.sort((a, b) => (b.score ?? -1) - (a.score ?? -1)).map(({ p, score }) => {
+            const color = score === null ? 'var(--muted)' : score >= 75 ? 'var(--ok)' : score >= 50 ? 'var(--warning)' : 'var(--danger)';
+            const label = score === null ? '—' : score >= 75 ? 'İyi' : score >= 50 ? 'Orta' : 'Düşük';
+            const m = metrics.find(x => x.participantId === p.id);
+            const sss = m?.sss ?? '—';
+            return `<tr>
+              <td><strong>${esc(p.values.fullName || '—')}</strong></td>
+              <td>
+                ${score !== null
+                  ? `<div style="display:flex;align-items:center;gap:10px;">
+                      <div style="flex:1;height:6px;background:var(--surface2);border-radius:99px;">
+                        <div style="width:${score}%;height:100%;border-radius:99px;background:${color};"></div>
+                      </div>
+                      <strong style="color:${color};width:32px;">${score}</strong>
+                    </div>`
+                  : '<span class="muted small">Yanıt yok</span>'}
+              </td>
+              <td><span style="background:${score===null?'var(--surface2)':score>=75?'var(--ok-soft)':score>=50?'var(--warning-soft)':'var(--danger-soft)'};color:${score===null?'var(--muted)':score>=75?'var(--ok)':score>=50?'var(--warning)':'var(--danger)'};padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;">${label}</span></td>
+              <td style="font-weight:700;color:${sss>=0?'var(--ok)':'var(--danger)'};">${typeof sss==='number'?(sss>0?'+':'')+sss:'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Sosyo × Pulse 2x2 matrisi -->
+    ${quadData.length ? `
+    <div class="section-title">SOSYOMETRİ × PULSE MATRİSİ</div>
+    <div class="notice" style="margin-bottom:12px;">Sosyometrik statü (SSS) ve pulse skoru birlikte değerlendiriliyor. Bu matris müdahale önceliğini belirler.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+      ${quadCard('⭐ Pozitif Statü + İyi Pulse', 'Güçlü merkezi kişiler. Mentor rolü için değerlendir.', '#0e7c5b', 'var(--ok-soft)', q1)}
+      ${quadCard('⚡ Pozitif Statü + Düşük Pulse', 'Merkezi ama yorgun! Overload riski. Rol dağılımını gözden geçir.', '#b45309', 'var(--warning-soft)', q2)}
+      ${quadCard('🔗 Negatif Statü + İyi Pulse', 'Motivasyonu var ama sosyal bağ kuramıyor. Köprü ilişkisi kur.', '#1a56a0', 'var(--accent-soft)', q3)}
+      ${quadCard('🔴 Negatif Statü + Düşük Pulse', 'En yüksek risk grubu. Öncelikli müdahale gerekli.', '#c0392b', 'var(--danger-soft)', q4)}
+    </div>` : ''}
+  `;
+}
+
+function bindAnalysisPage(project) {
+  // Sekme değişimi
+  document.querySelectorAll('[data-atab]').forEach(btn => {
+    btn.onclick = () => { ui.analysisTab = btn.dataset.atab; render(); };
+  });
+
+  // Analiz çalıştır
+  document.getElementById('run-analysis').onclick = () => {
+    const useRankWeight = document.getElementById('rank-weight-toggle')?.checked || false;
+    const relations = buildRelations(project, useRankWeight);
+    const personMetrics = buildPersonMetrics(project, relations);
+    const groupMetrics = buildGroupMetrics(project, personMetrics, relations);
+    project.analysis = { ...project.analysis, calculatedAt: nowISO(), relations, personMetrics, groupMetrics };
+    project.updatedAt = nowISO();
+    updateProject(project);
+    render();
+    showMessage('success', useRankWeight ? 'Analiz güncellendi (sıra ağırlıklı).' : 'Analiz güncellendi.');
+  };
+}
+
+
+function renderGoogleFormPage(project) {
+  const g=project.googleForm||{};const activeP=project.participants.filter(p=>p.active);const ready=activeP.length>0&&project.questions.length>0;
+  return `<div class="page-header"><div><h2 class="page-title">Form Yönetimi</h2><p class="page-subtitle">Google Form oluştur ve yanıtları otomatik çek.</p></div></div>
+  <div class="card" style="margin-bottom:16px"><div class="section-title" style="margin-top:0">Proje Durumu</div><div style="display:flex;gap:24px;font-size:14px"><span>${activeP.length} katılımcı ${activeP.length===0?'⚠':'✓'}</span><span>${project.questions.length} soru ${project.questions.length===0?'⚠':'✓'}</span></div></div>
+  <div class="card" style="margin-bottom:16px"><div class="section-title" style="margin-top:0">1. Google Form Oluştur</div><div class="field" style="margin-bottom:14px"><label>Form Açıklaması</label><textarea id="form-description" class="textarea" style="min-height:80px" placeholder="Bu form sosyometri çalışması kapsamında hazırlanmıştır.">${g.description||''}</textarea></div>${g.formUrl?`<p>✅ Form oluşturuldu</p><div style="background:var(--surface2);padding:12px;border-radius:8px;margin-bottom:12px"><a href="${g.formUrl}" target="_blank" style="color:var(--accent);word-break:break-all;font-size:13px">${g.formUrl}</a></div>`:''}<button class="btn btn-primary" id="create-form-btn" ${!ready?'disabled':''}>${g.formUrl?'Formu Yeniden Oluştur':'Form Oluştur'}</button><div id="create-form-status" style="margin-top:10px"></div></div>
+  <div class="card"><div class="section-title" style="margin-top:0">2. Yanıtları Çek</div>${g.lastSyncAt?`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Son çekim: ${formatDate(g.lastSyncAt)}</p>`:''}<button class="btn btn-primary" id="sync-btn" ${!g.formId?'disabled':''}>Yanıtları Çek</button>${!g.formId?'<p style="color:var(--muted);font-size:13px;margin-top:8px">Önce form oluştur.</p>':''}<div id="sync-status" style="margin-top:10px"></div></div>`;
+}
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycby8EX7Aa7yxf3wtcjCKxtXbVCbRPVToz1wd4SP7Vdpa5uWbHh1BCiVBIXN_EqD5YEDH/exec";
+async function callScript(payload){const res=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});const data=await res.json();if(data.error)throw new Error(data.error);return data;}
+function bindGoogleFormPage(project) {
+  const createBtn=document.getElementById('create-form-btn');const syncBtn=document.getElementById('sync-btn');const createStatus=document.getElementById('create-form-status');const syncStatus=document.getElementById('sync-status');
+  if(createBtn){createBtn.onclick=async()=>{
+    createBtn.disabled=true;createBtn.textContent='Oluşturuluyor…';createStatus.innerHTML='';
+    try{
+      const activeP=project.participants.filter(p=>p.active);
+      const formDesc=document.getElementById('form-description')?.value||'';
+      const result=await callScript({
+        action:'createForm',
+        title:project.name,
+        description:formDesc,
+        participants:activeP.map(p=>({id:p.id,name:p.values.fullName||p.id})),
+        questions:project.questions.map(q=>({
+          id:q.id,
+          title:q.title,
+          description:q.description||'',
+          required:q.required||false,
+          category:q.category,
+          max:q.max||3,
+          pulseMax:q.pulseMax||5,
+          pulseDimension:q.pulseDimension||'genel'
+        }))
+      });
+      project.googleForm={formId:result.formId,formUrl:result.formUrl,sheetId:result.sheetId,questionMap:result.questionMap,createdAt:new Date().toISOString()};
+      updateProject(project);
+      createStatus.innerHTML=`<div style="color:var(--ok)">✅ Form oluşturuldu! <a href="${result.formUrl}" target="_blank">Aç →</a></div>`;
+      render();
+    }catch(e){createStatus.innerHTML=`<div style="color:var(--danger)">Hata: ${esc(e.message)}</div>`;createBtn.disabled=false;createBtn.textContent='Form Oluştur';}
+  };}
+  if(syncBtn){syncBtn.onclick=async()=>{
+    syncBtn.disabled=true;syncBtn.textContent='Çekiliyor…';syncStatus.innerHTML='';
+    try{
+      const activeP=project.participants.filter(p=>p.active);
+      const result=await callScript({
+        action:'getResponses',
+        formId:project.googleForm.formId,
+        participants:activeP.map(p=>({id:p.id,name:p.values.fullName||p.id})),
+        questions:project.questions.map(q=>({id:q.id,title:q.title,category:q.category})),
+        questionMap:project.googleForm.questionMap||[]
+      });
+      const existingIds=new Set((project.responses||[]).map(r=>r.googleResponseId));
+      const newResponses=result.responses
+        .filter(r=>!existingIds.has(r.googleResponseId))
+        .map(r=>({
+          id:'r_'+Math.random().toString(36).slice(2,10),
+          googleResponseId:r.googleResponseId,
+          submittedAt:r.submittedAt,
+          respondentId:r.respondentId,
+          answers:r.answers,
+          edited:false,editedAt:null,editedFields:[],
+          status:r.respondentId?'valid':'pending'
+        }));
+      project.responses=[...(project.responses||[]),...newResponses];
+      project.googleForm.lastSyncAt=new Date().toISOString();
+      updateProject(project);
+      syncStatus.innerHTML=`<div style="color:var(--ok)">✅ ${newResponses.length} yeni yanıt eklendi. Toplam: ${project.responses.length}</div>`;
+      render();
+    }catch(e){syncStatus.innerHTML=`<div style="color:var(--danger)">Hata: ${esc(e.message)}</div>`;syncBtn.disabled=false;syncBtn.textContent='Yanıtları Çek';}
+  };}
+}
+
+function renderReportsPage(project) {
+  const hasPulse = project.questions.some(q => ['pulse-scale','pulse-yesno','pulse-text'].includes(q.category));
+  const socioSections = [
+    {id:'kurumBilgileri',label:'Kurum Bilgileri'},
+    {id:'katilimciListesi',label:'Katılımcı Listesi'},
+    {id:'soruListesi',label:'Soru Listesi'},
+    {id:'grupOzeti',label:'Grup Özeti'},
+    {id:'kisiMetrikleri',label:'Kişi Bazlı Metrikler'},
+    {id:'sosyometrikMatris',label:'Sosyometrik Matris'},
+    {id:'yildizKisiler',label:'Yıldız Kişiler'},
+    {id:'altGruplar',label:'Alt Gruplar'},
+    {id:'izoleKisiler',label:'İzole Kişiler'},
+    {id:'karsilikliSecimler',label:'Karşılıklı Seçimler'},
+  ];
+  const pulseSections = hasPulse ? [
+    {id:'pulseBoyutlar',label:'💜 Pulse — Boyut Ortalamaları'},
+    {id:'pulseKisiler',label:'💜 Pulse — Kişi Bazlı Skorlar'},
+    {id:'pulseMudahale',label:'💜 Pulse — Müdahale Risk Tablosu'},
+  ] : [];
+  const allSections = [...socioSections, ...pulseSections];
+
+  return `
+    <div class="page-header">
+      <div><h2 class="page-title">Rapor</h2>
+      <p class="page-subtitle">Sosyometri${hasPulse?' + Pulse':''} raporu. Dahil edilecek bölümleri seç.</p></div>
+    </div>
+    ${renderMessages()}
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title" style="margin-top:0;">📊 Sosyometri Bölümleri</div>
+      <div class="grid-2">
+        ${socioSections.map(s=>`<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0;"><input type="checkbox" id="sec-${s.id}" checked style="width:15px;height:15px;"><span style="font-size:14px;">${s.label}</span></label>`).join('')}
+      </div>
+      ${hasPulse ? `
+      <div style="height:1px;background:var(--border);margin:16px 0;"></div>
+      <div class="section-title" style="margin-top:0;color:var(--pulse);">💜 Pulse Bölümleri</div>
+      <div class="grid-2">
+        ${pulseSections.map(s=>`<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 0;"><input type="checkbox" id="sec-${s.id}" checked style="width:15px;height:15px;"><span style="font-size:14px;">${s.label}</span></label>`).join('')}
+      </div>` : ''}
+    </div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title" style="margin-top:0;">Seçenekler</div>
+      <div class="grid-2">
+        <div class="field"><label>Hazırlayan</label><input id="report-author" class="input" placeholder="Ad Soyad / Unvan"></div>
+        <div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:22px;"><input type="checkbox" id="report-use-codes" style="width:15px;height:15px;" ${project.institution.codePrefix?'checked':''}>İsimlerin yerine kod kullan</label></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card"><div class="section-title" style="margin-top:0;">PDF</div><p class="page-subtitle">Yazdır penceresi açılır.</p><button class="btn btn-primary" id="report-pdf">PDF Hazırla</button></div>
+      <div class="card"><div class="section-title" style="margin-top:0;">Word</div><p class="page-subtitle">.doc dosyası oluşturur.</p><button class="btn btn-primary" id="report-word">Word İndir</button></div>
+      <div class="card"><div class="section-title" style="margin-top:0;">Excel</div><p class="page-subtitle">Sekmeli Excel raporu.</p><button class="btn btn-primary" id="report-excel">Excel İndir</button></div>
+    </div>`;
+}
+
+function getSelectedSections() {
+  const ids = ['kurumBilgileri','katilimciListesi','soruListesi','grupOzeti','kisiMetrikleri',
+    'sosyometrikMatris','yildizKisiler','altGruplar','izoleKisiler','karsilikliSecimler',
+    'pulseBoyutlar','pulseKisiler','pulseMudahale'];
+  const result = {};
+  ids.forEach(id => { const el = document.getElementById('sec-'+id); result[id] = el ? el.checked : true; });
+  return result;
+}
+function getReportOptions(){return{author:document.getElementById('report-author')?.value||'',useCodes:document.getElementById('report-use-codes')?.checked||false};}
+function bindReportsPage(project) {
+  document.getElementById('report-word').onclick = () => { const secs=getSelectedSections();const opts=getReportOptions();downloadBlob(`${project.name}_rapor.doc`,buildReportHtml(project,secs,null,opts),'application/msword'); };
+  document.getElementById('report-excel').onclick = () => exportExcelReport(project);
+  document.getElementById('report-pdf').onclick = () => { const secs=getSelectedSections();const opts=getReportOptions();const w=window.open('','_blank');w.document.open();w.document.write(buildReportHtml(project,secs,null,opts));w.document.close();w.focus();setTimeout(()=>w.print(),400); };
+}
+
+function exportProject(project){downloadBlob(`${project.name}_yedek.json`,JSON.stringify(project,null,2),'application/json');}
+function importProjectFromFile(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=async()=>{try{const text=await input.files[0].text();const p=JSON.parse(text);if(!p.id||!p.name)throw new Error('Geçersiz proje dosyası.');p.id=uid('proj');updateProject(p);showMessage('success',`"${p.name}" projesi içe aktarıldı.`);render();}catch(e){showMessage('error','Dosya okunamadı: '+e.message);}};input.click();}
+function downloadBlob(filename,content,mime){const blob=new Blob([content],{type:mime});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+function exportExcelReport(project) {
+  const wb = XLSX.utils.book_new();
+  const PULSE_CATS = ['pulse-scale','pulse-yesno','pulse-text'];
+  const pm = project.analysis.pulseMetrics;
+
+  // Katılımcılar
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(project.participants.filter(p=>p.active).map(p=>p.values)), 'Kisiler');
+  // Sorular
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(project.questions.map(q=>({baslik:q.title,kategori:q.category,min:q.min,max:q.max}))), 'Sorular');
+  // İlişkiler
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(project.analysis.relations.map(r=>({from:participantName(project,r.from),to:participantName(project,r.to),soru:project.questions.find(q=>q.id===r.questionId)?.title||r.questionId,tip:r.type}))), 'Iliskiler');
+  // Sosyo metrikler
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(project.analysis.personMetrics.map(m=>({kisi:participantName(project,m.participantId),aldigi_secim:m.receivedChoices,aldigi_itme:m.receivedRejections,net:m.netScore||0,sss:m.sss||0,izolasyon:m.isolationType||'—'}))), 'Sosyo_Metrikler');
+
+  // Pulse metrikler (varsa)
+  if (pm) {
+    // Kişi bazlı pulse skorları
+    const pulseRows = project.participants.filter(p=>p.active).map(p => {
+      const score = pm.personPulseScores[p.id];
+      const risk = calcRiskScore(project.analysis.personMetrics.find(m=>m.participantId===p.id), score);
+      return { kisi: p.values.fullName||'—', pulse_skoru: score??'—', risk_skoru: risk };
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pulseRows), 'Pulse_Kisiler');
+
+    // Boyut ortalamaları
+    const PULSE_DIM_LABELS = {'psikolojik-guvenlik':'Psikolojik Güvenlik','motivasyon':'Motivasyon','is-yuku':'İş Yükü','takim-uyumu':'Takım Uyumu','yonetici-iliskisi':'Yönetici İlişkisi','genel':'Genel'};
+    const dimRows = Object.entries(pm.dimensionAverages).map(([dim,avg]) => ({boyut:PULSE_DIM_LABELS[dim]||dim,ortalama_pct:avg}));
+    if (dimRows.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dimRows), 'Pulse_Boyutlar');
+  }
+
+  XLSX.writeFile(wb, `${project.name}_rapor.xlsx`);
+}
+
+function buildReportHtml(project,secs,sociogramPng,opts){secs=secs||{};opts=opts||{};const useCodes=opts.useCodes||false;const author=opts.author||'';const analysis=project.analysis;const gm=analysis.groupMetrics||{};const metrics=analysis.personMetrics||[];const active=project.participants.filter(p=>p.active);function pName(id){const p=project.participants.find(x=>x.id===id);if(!p)return id;if(useCodes&&p.values.code)return p.values.code;return p.values.fullName||'—';}
+const css=`body{font-family:Arial,sans-serif;padding:30px;color:#111;font-size:13px;}h1{font-size:22px;margin:0 0 4px;}h2{font-size:17px;margin:28px 0 10px;border-bottom:2px solid #2563eb;padding-bottom:6px;color:#1e3a8a;}table{width:100%;border-collapse:collapse;margin-top:10px;margin-bottom:16px;}th,td{border:1px solid #d1d5db;padding:7px 10px;font-size:12px;}th{background:#eff6ff;color:#1e3a8a;font-weight:700;}tr:nth-child(even){background:#f9fafb;}.ok{background:#dcfce7;color:#166534;}.danger{background:#fee2e2;color:#991b1b;}.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;}`;
+let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${esc(project.name)} Rapor</title><style>${css}</style></head><body>`;
+html+=`<h1>${esc(project.name)}</h1><p style="color:#6b7280;font-size:12px;">Oluşturma tarihi: ${new Date().toLocaleDateString('tr-TR')}</p>`;
+if(secs.kurumBilgileri)html+=`<h2>Kurum Bilgileri</h2><table><tbody><tr><th>Kurum Adı</th><td>${esc(project.institution.name||'—')}</td><th>Birim</th><td>${esc(project.institution.unit||'—')}</td></tr></tbody></table>`;
+if(secs.grupOzeti){html+=`<h2>Grup Özeti</h2><table><tbody><tr><th>Katılım</th><td>${Math.round((gm.participationRate||0)*100)}%</td><th>Ağ Yoğunluğu</th><td>${gm.networkDensity||0}%</td></tr><tr><th>Yıldız</th><td>${(gm.stars||[]).length}</td><th>İzole</th><td>${(gm.fullyIsolated||[]).length}</td></tr></tbody></table>`;if(gm.autoSummary)gm.autoSummary.forEach(s=>{html+=`<p>• ${esc(s)}</p>`;});}
+if(secs.kisiMetrikleri){html+=`<h2>Kişi Bazlı Metrikler</h2><table><thead><tr><th>Kişi</th><th>Seçildi</th><th>İtildi</th><th>Net</th><th>SSS</th></tr></thead><tbody>`;metrics.forEach(m=>{html+=`<tr><td><strong>${esc(pName(m.participantId))}</strong></td><td>${m.receivedChoices}</td><td>${m.receivedRejections}</td><td style="font-weight:700;color:${(m.netScore||0)>=0?'#166534':'#991b1b'}">${(m.netScore||0)>0?'+':''}${m.netScore||0}</td><td>${m.sss||0}</td></tr>`;});html+=`</tbody></table>`;}
+if(sociogramPng)html+=`<h2>Sosyogram</h2><img src="${sociogramPng}" style="max-width:100%;border:1px solid #e5e7eb;border-radius:8px;"/>`;
+
+// ── Pulse bölümleri ──
+const pm = analysis.pulseMetrics;
+const PDL = {'psikolojik-guvenlik':'Psikolojik Güvenlik','motivasyon':'Motivasyon','is-yuku':'İş Yükü','takim-uyumu':'Takım Uyumu','yonetici-iliskisi':'Yönetici İlişkisi','genel':'Genel'};
+
+if(secs.pulseBoyutlar && pm && Object.keys(pm.dimensionAverages||{}).length){
+  html+=`<h2 style="border-color:#7c3aed;color:#5b21b6;">💜 Pulse — Boyut Ortalamaları</h2>
+  <table><thead><tr><th>Boyut</th><th>Ortalama (%)</th><th>Değerlendirme</th></tr></thead><tbody>`;
+  Object.entries(pm.dimensionAverages).sort((a,b)=>a[1]-b[1]).forEach(([dim,avg])=>{
+    const label=avg>=75?'İyi':avg>=50?'Orta':'Düşük';
+    const cls=avg>=75?'ok':avg>=50?'':'danger';
+    html+=`<tr><td>${esc(PDL[dim]||dim)}</td><td><strong>${avg}%</strong></td><td><span class="badge ${cls}">${label}</span></td></tr>`;
+  });
+  html+=`</tbody></table>`;
+}
+
+if(secs.pulseKisiler && pm){
+  html+=`<h2 style="border-color:#7c3aed;color:#5b21b6;">💜 Pulse — Kişi Bazlı Skorlar</h2>
+  <table><thead><tr><th>Kişi</th><th>Pulse Skoru</th><th>SSS</th><th>Durum</th></tr></thead><tbody>`;
+  active.forEach(p=>{
+    const score = pm.personPulseScores[p.id];
+    const m = metrics.find(x=>x.participantId===p.id);
+    const label = score===null?'Yanıt yok':score>=75?'İyi':score>=50?'Orta':'Düşük';
+    const cls = score===null?'':score>=75?'ok':score>=50?'':'danger';
+    html+=`<tr><td><strong>${esc(pName(p.id))}</strong></td><td>${score??'—'}</td><td style="color:${(m?.sss||0)>=0?'#166534':'#991b1b'}">${(m?.sss||0)>0?'+':''}${m?.sss||0}</td><td><span class="badge ${cls}">${label}</span></td></tr>`;
+  });
+  html+=`</tbody></table>`;
+}
+
+if(secs.pulseMudahale && pm){
+  html+=`<h2 style="border-color:#7c3aed;color:#5b21b6;">💜 Pulse — Müdahale Risk Tablosu</h2>
+  <table><thead><tr><th>Kişi</th><th>Risk</th><th>Öncelik</th><th>Önerilen Müdahale</th></tr></thead><tbody>`;
+  [...metrics].sort((a,b)=>{
+    const ra=calcRiskScore(a, pm.personPulseScores[a.participantId]);
+    const rb=calcRiskScore(b, pm.personPulseScores[b.participantId]);
+    return rb-ra;
+  }).forEach(m=>{
+    const ps = pm.personPulseScores[m.participantId];
+    const risk = calcRiskScore(m, ps);
+    const iv = getRuleBasedIntervention(m, ps);
+    const cls = risk>=70?'danger':risk>=40?'':'ok';
+    html+=`<tr><td><strong>${esc(pName(m.participantId))}</strong></td><td><span class="badge ${cls}">${risk}/100</span></td><td>${esc(iv.oncelik)}</td><td style="font-size:11px;">${esc(iv.eylem)}</td></tr>`;
+  });
+  html+=`</tbody></table>`;
+}
+
+html+=`<div style="margin-top:40px;border-top:1px solid #e5e7eb;padding-top:16px;font-size:12px;color:#6b7280;">${author?`<strong>Hazırlayan:</strong> ${esc(author)} &nbsp;|&nbsp; `:''}<strong>Tarih:</strong> ${new Date().toLocaleDateString('tr-TR')} &nbsp;|&nbsp; Sosyal Pusula</div></body></html>`;
+return html;}
+
+
+function renderSociogramPage(project) {
+  const questions = [{ id: 'all', title: 'Tüm Sorular (Birleşik)' }, ...project.questions];
+  const hasPulse = project.analysis?.pulseMetrics != null;
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Sosyogram</h2>
+        <p class="page-subtitle">Düğümleri sürükle · Tıkla detay gör · Mod seç</p>
+      </div>
+      <div class="row" style="align-items:center;flex-wrap:wrap;gap:8px;">
+        <select class="select" id="socio-filter" style="min-width:200px;">
+          ${questions.map(q => `<option value="${q.id}">${esc(q.title)}</option>`).join('')}
+        </select>
+        <input id="socio-search" class="input" placeholder="İsim ara…" style="width:130px;padding:8px 12px;font-size:13px;">
+        ${hasPulse ? `
+        <label style="display:flex;align-items:center;gap:7px;padding:8px 14px;
+          border:1px solid var(--pulse);border-radius:12px;cursor:pointer;
+          font-size:13px;font-weight:600;color:var(--pulse);background:var(--pulse-soft);user-select:none;">
+          <input type="checkbox" id="pulse-layer-toggle" style="width:15px;height:15px;" checked>
+          💜 Pulse
+        </label>` : ''}
+        <button class="btn btn-soft" id="download-svg-btn">PNG</button>
+        <button class="btn btn-primary" id="reset-socio-layout">Sıfırla</button>
+      </div>
+    </div>
+
+    ${project.analysis.calculatedAt ? `
+
+      <!-- Mod seçici toolbar -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+
+        <!-- Drag modu -->
+        <div style="display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);">
+          <button id="mode-free" class="socio-mode-btn active" title="Serbest mod: Tek düğümü sürükle">
+            🖱 Serbest
+          </button>
+          <button id="mode-group" class="socio-mode-btn" title="Grup mod: Bağlı düğümler birlikte hareket eder">
+            🔗 Grup
+          </button>
+          <button id="mode-lasso" class="socio-mode-btn" title="Kement mod: Alan çiz, seçilen düğümleri birlikte taşı">
+            ⬡ Kement
+          </button>
+          <button id="mode-physics" class="socio-mode-btn" title="Fizik mod: Seçimler çeker, itmeler iter">
+            🧲 Fizik
+          </button>
+        </div>
+
+        <!-- Ayraç -->
+        <div style="width:1px;height:28px;background:var(--border);"></div>
+
+        <!-- Görünüm -->
+        <div style="display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);">
+          <button id="view-normal" class="socio-view-btn active" title="Normal görünüm">⬤ Normal</button>
+          <button id="view-risk" class="socio-view-btn" title="Risk haritası: Düğüm rengi risk skorunu gösterir">🌡 Risk</button>
+        </div>
+
+        <!-- Durum etiketi -->
+        <span id="socio-mode-label" style="font-size:12px;color:var(--muted);margin-left:4px;">
+          Mod: <strong style="color:var(--accent);">Serbest</strong> — Tek düğümü sürükle
+        </span>
+
+        <!-- Legand -->
+        <div style="margin-left:auto;display:flex;gap:12px;font-size:12px;color:var(--muted);align-items:center;flex-wrap:wrap;">
+          <span>— Seçim</span>
+          <span style="color:#c0392b;">- - İtme</span>
+          <span>○ Kadın △ Erkek</span>
+          ${hasPulse ? `<span style="color:var(--pulse);">Halka = Pulse</span>` : ''}
+        </div>
+      </div>
+
+      <!-- Kement seçim kutusu (hidden by default) -->
+      <div id="lasso-box" style="display:none;position:absolute;border:2px dashed var(--accent);background:rgba(26,86,160,.06);border-radius:4px;pointer-events:none;z-index:10;"></div>
+
+      <div style="display:flex;gap:16px;align-items:flex-start;position:relative;">
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;">
+          <svg id="socio-svg" viewBox="0 0 900 620"
+               style="display:block;width:100%;cursor:default;"></svg>
+        </div>
+        <div id="socio-detail-panel" style="width:0;overflow:hidden;transition:width .25s;
+          background:var(--surface);border:1px solid var(--border);border-radius:18px;flex-shrink:0;">
+          <div id="socio-detail-content" style="width:300px;padding:20px;"></div>
+        </div>
+      </div>
+
+    ` : `
+      <div class="empty">
+        <div class="empty-icon">🔵</div>
+        <div class="empty-title">Sosyogram hazır değil</div>
+        <div class="empty-desc">Analiz sayfasından analizi çalıştır.</div>
+      </div>
+    `}
+
+    <style>
+      .socio-mode-btn {
+        padding:7px 14px;border:none;background:transparent;cursor:pointer;
+        font-size:13px;font-weight:500;color:var(--muted);transition:all .15s;
+        border-right:1px solid var(--border);
+      }
+      .socio-mode-btn:last-child { border-right:none; }
+      .socio-mode-btn.active {
+        background:var(--accent-soft);color:var(--accent);font-weight:700;
+      }
+      .socio-mode-btn:hover:not(.active) { background:var(--surface2); }
+      .socio-view-btn {
+        padding:7px 14px;border:none;background:transparent;cursor:pointer;
+        font-size:13px;font-weight:500;color:var(--muted);transition:all .15s;
+        border-right:1px solid var(--border);
+      }
+      .socio-view-btn:last-child { border-right:none; }
+      .socio-view-btn.active { background:var(--accent-soft);color:var(--accent);font-weight:700; }
+      .socio-view-btn:hover:not(.active) { background:var(--surface2); }
+      .snode-selected > circle, .snode-selected > polygon {
+        stroke: var(--accent) !important;
+        stroke-width: 3 !important;
+      }
+    </style>
+  `;
+}
+
+let SOCIO_NODES=[], SOCIO_EDGES=[], SOCIO_ANIM=null,
+    SOCIO_DRAG=null, SOCIO_DRAG_OFF={x:0,y:0},
+    SOCIO_SPOTLIGHT=null, SOCIO_SHOW_PULSE=true,
+    SOCIO_DRAG_MODE='free',   // 'free' | 'group' | 'lasso'
+    SOCIO_VIEW_MODE='normal', // 'normal' | 'risk'
+    SOCIO_DRAG_SNAPSHOT=null, // grup modunda bağlı düğüm ofsetleri
+    SOCIO_LASSO={active:false,x0:0,y0:0,x1:0,y1:0}, // kement koordinatları
+    SOCIO_LASSO_SEL=new Set(); // kementle seçilen düğüm idleri
+const SOCIO_W=900, SOCIO_H=620;
+
+function bindSociogramPage(project) {
+  const svg = document.getElementById('socio-svg');
+  if (!svg) return;
+  const active = project.participants.filter(p => p.active);
+  const pm = project.analysis?.pulseMetrics || null;
+  const ZERO = {receivedChoices:0,receivedRejections:0,sentChoices:0,
+                sentRejections:0,mutualChoices:0,mutualRejections:0,netChoiceScore:0};
+  let currentFilter = 'all';
+
+  // ── Yardımcılar ─────────────────────────────────────────────────────────
+  function getPulseScore(pid) { return pm?.personPulseScores?.[pid] ?? null; }
+  function pulseRingColor(s) {
+    if (s===null) return null;
+    return s>=75?'#0e7c5b':s>=50?'#b45309':'#c0392b';
+  }
+  function getRiskColor(pid) {
+    // Risk modunda düğüm rengi risk skoruna göre
+    const m = project.analysis.personMetrics.find(x=>x.participantId===pid);
+    const ps = getPulseScore(pid);
+    let risk = 0;
+    if (m?.isolationType==='tam') risk+=40;
+    else if (m?.isolationType==='tek-yonlu') risk+=20;
+    if ((m?.receivedRejections||0)>=3) risk+=20;
+    else if ((m?.receivedRejections||0)>=1) risk+=10;
+    if (ps!==null) { if(ps<40)risk+=40; else if(ps<60)risk+=20; else if(ps<75)risk+=10; }
+    risk=Math.min(risk,100);
+    if (risk>=70) return '#c0392b';
+    if (risk>=40) return '#b45309';
+    return '#0e7c5b';
+  }
+  function getFilteredRelations(qid) {
+    return qid&&qid!=='all'
+      ? project.analysis.relations.filter(r=>r.questionId===qid)
+      : project.analysis.relations;
+  }
+  function buildMetricsMap(rels) {
+    const map = new Map(active.map(p=>[p.id,{...ZERO}]));
+    for (const r of rels) {
+      const f=map.get(r.from)||{...ZERO}, t=map.get(r.to)||{...ZERO};
+      if(r.type==='seçim'){f.sentChoices++;t.receivedChoices++;}
+      else{f.sentRejections++;t.receivedRejections++;}
+      map.set(r.from,f); map.set(r.to,t);
+    }
+    for (const [,m] of map) m.netChoiceScore=(m.receivedChoices||0)-(m.receivedRejections||0);
+    return map;
+  }
+  function nodeSize(m) { return Math.max(16,Math.min(34,16+(m.receivedChoices||0)*2.5)); }
+
+  function initNodes() {
+    const mm = buildMetricsMap(getFilteredRelations(currentFilter));
+    SOCIO_NODES = active.map((p,i) => {
+      const angle=2*Math.PI*i/Math.max(active.length,1);
+      const radius=Math.min(220,Math.max(120,active.length*16));
+      return {id:p.id, label:participantName(project,p.id), code:p.values.code||'',
+              gender:(p.values.gender||'').toLowerCase(),
+              x:SOCIO_W/2+radius*Math.cos(angle), y:SOCIO_H/2+radius*Math.sin(angle),
+              vx:0, vy:0, m:mm.get(p.id)||{...ZERO}};
+    });
+  }
+  function refreshNodeMetrics() {
+    const mm=buildMetricsMap(getFilteredRelations(currentFilter));
+    SOCIO_NODES=SOCIO_NODES.map(n=>({...n,m:mm.get(n.id)||{...ZERO}}));
+  }
+  function buildEdges(qid) {
+    const rels=getFilteredRelations(qid); const seen=new Set(); SOCIO_EDGES=[];
+    for (const r of rels) {
+      const mutual=rels.some(r2=>r2.from===r.to&&r2.to===r.from&&r2.type===r.type);
+      if (mutual) {
+        const pk=[r.from,r.to].sort().join('_')+'_'+r.type+'_m';
+        if(seen.has(pk)) continue; seen.add(pk);
+        SOCIO_EDGES.push({from:r.from,to:r.to,type:r.type,mutual:true});
+      } else {
+        const key=r.from+'_'+r.to+'_'+r.type;
+        if(seen.has(key)) continue; seen.add(key);
+        SOCIO_EDGES.push({from:r.from,to:r.to,type:r.type,mutual:false});
+      }
+    }
+  }
+
+  // Bir düğüme bağlı tüm düğümleri bul (seçim + itme)
+  function getConnectedIds(pid) {
+    const ids = new Set([pid]);
+    for (const e of SOCIO_EDGES) {
+      if (e.from===pid) ids.add(e.to);
+      if (e.to===pid)   ids.add(e.from);
+    }
+    return ids;
+  }
+
+  // ── SVG Çiz ─────────────────────────────────────────────────────────────
+  function drawSVG() {
+    const nmap=new Map(SOCIO_NODES.map(n=>[n.id,n]));
+    const spotConn = SOCIO_SPOTLIGHT
+      ? new Set(SOCIO_EDGES.filter(e=>e.from===SOCIO_SPOTLIGHT||e.to===SOCIO_SPOTLIGHT).flatMap(e=>[e.from,e.to]))
+      : null;
+
+    let html=`<defs>
+      <marker id="ac" markerWidth="7" markerHeight="7" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L7,3z" fill="#2d6a4f"/></marker>
+      <marker id="ac-s" markerWidth="7" markerHeight="7" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M7,0 L7,6 L0,3z" fill="#2d6a4f"/></marker>
+      <marker id="ar" markerWidth="7" markerHeight="7" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L7,3z" fill="#c0392b"/></marker>
+      <marker id="ar-s" markerWidth="7" markerHeight="7" refX="0" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M7,0 L7,6 L0,3z" fill="#c0392b"/></marker>
+    </defs>`;
+
+    // Kement seçim alanı SVG içinde
+    if (SOCIO_DRAG_MODE==='lasso' && SOCIO_LASSO.active) {
+      const lx=Math.min(SOCIO_LASSO.x0,SOCIO_LASSO.x1);
+      const ly=Math.min(SOCIO_LASSO.y0,SOCIO_LASSO.y1);
+      const lw=Math.abs(SOCIO_LASSO.x1-SOCIO_LASSO.x0);
+      const lh=Math.abs(SOCIO_LASSO.y1-SOCIO_LASSO.y0);
+      html+=`<rect x="${lx}" y="${ly}" width="${lw}" height="${lh}"
+        fill="rgba(26,86,160,.06)" stroke="var(--accent)"
+        stroke-width="1.5" stroke-dasharray="6,3" rx="4"/>`;
+    }
+
+    // Kenarlar
+    for (const e of SOCIO_EDGES) {
+      const a=nmap.get(e.from), b=nmap.get(e.to); if(!a||!b) continue;
+      const edgeActive=!SOCIO_SPOTLIGHT||e.from===SOCIO_SPOTLIGHT||e.to===SOCIO_SPOTLIGHT;
+      const op=edgeActive?1:0.05;
+      const dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+      const ux=dx/d, uy=dy/d;
+      const sx=a.x+ux*(nodeSize(a.m)+6), sy=a.y+uy*(nodeSize(a.m)+6);
+      const ex=b.x-ux*(nodeSize(b.m)+6), ey=b.y-uy*(nodeSize(b.m)+6);
+      const col=e.type==='seçim'?'#2d6a4f':'#c0392b';
+      const dash=e.type==='itme'?'stroke-dasharray="5,4"':'';
+      const mEnd=e.type==='seçim'?'ac':'ar';
+      const mSt=e.type==='seçim'?'ac-s':'ar-s';
+      if (e.mutual) {
+        const px=-uy*24, py=ux*24;
+        const cx=(sx+ex)/2+px, cy=(sy+ey)/2+py;
+        html+=`<path d="M${sx},${sy} Q${cx},${cy} ${ex},${ey}" stroke="${col}" stroke-width="2.5" ${dash} fill="none" opacity="${op*.75}" marker-start="url(#${mSt})" marker-end="url(#${mEnd})"/>`;
+      } else {
+        html+=`<path d="M${sx},${sy} L${ex},${ey}" stroke="${col}" stroke-width="1.5" ${dash} fill="none" opacity="${op*.65}" marker-end="url(#${mEnd})"/>`;
+      }
+    }
+
+    // Düğümler
+    for (const n of SOCIO_NODES) {
+      const sz=nodeSize(n.m);
+      const isActive=!SOCIO_SPOTLIGHT||n.id===SOCIO_SPOTLIGHT||(spotConn&&spotConn.has(n.id));
+      const op=isActive?1:0.15;
+      const isFemale=n.gender.includes('kad');
+      const isLassoSel=SOCIO_LASSO_SEL.has(n.id);
+
+      // Risk modu vs normal
+      let fill;
+      if (SOCIO_VIEW_MODE==='risk') {
+        fill = getRiskColor(n.id);
+      } else {
+        const net=(n.m.receivedChoices||0)-(n.m.receivedRejections||0);
+        fill=net>0?`hsl(140,${35+net*5}%,${72-net*3}%)`:net<0?`hsl(0,${35+Math.abs(net)*5}%,${78-Math.abs(net)*2}%)`:'#e8e6e0';
+      }
+
+      const pulseScore=getPulseScore(n.id);
+      const ringColor=SOCIO_SHOW_PULSE?pulseRingColor(pulseScore):null;
+      const ringW=4, ringR=sz+ringW+1;
+
+      // Kement seçili düğüm ek halkası
+      const selStroke=isLassoSel?'var(--accent)':'';
+      const selStrokeW=isLassoSel?3:0;
+
+      html+=`<g transform="translate(${n.x},${n.y})" data-id="${n.id}" class="snode" style="cursor:${SOCIO_DRAG_MODE==='lasso'?'crosshair':'grab'};opacity:${op}">`;
+
+      // Kement seçim halkası
+      if (isLassoSel) {
+        if (isFemale) html+=`<circle cx="0" cy="0" r="${sz+8}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4,2" opacity="0.7"/>`;
+        else html+=`<polygon points="0,${-(sz+8)} ${(sz+8)*.866},${(sz+8)*.5} ${-(sz+8)*.866},${(sz+8)*.5}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4,2" opacity="0.7"/>`;
+      }
+
+      // Pulse halkası
+      if (ringColor) {
+        if (isFemale) html+=`<circle cx="0" cy="0" r="${ringR}" fill="none" stroke="${ringColor}" stroke-width="${ringW}" opacity="0.85"/>`;
+        else html+=`<polygon points="0,${-ringR} ${ringR*.866},${ringR*.5} ${-ringR*.866},${ringR*.5}" fill="none" stroke="${ringColor}" stroke-width="${ringW}" opacity="0.85"/>`;
+      }
+
+      // Gövde
+      if (isFemale) html+=`<circle cx="0" cy="0" r="${sz}" fill="${fill}" stroke="${isLassoSel?'var(--accent)':'#888'}" stroke-width="${isLassoSel?2.5:1.5}"/>`;
+      else html+=`<polygon points="0,${-sz} ${sz*.866},${sz*.5} ${-sz*.866},${sz*.5}" fill="${fill}" stroke="${isLassoSel?'var(--accent)':'#888'}" stroke-width="${isLassoSel?2.5:1.5}"/>`;
+
+      // Seçilme sayısı
+      if ((n.m.receivedChoices||0)>0) {
+        const dy=isFemale?'4':String(Math.round(sz*.17));
+        html+=`<text text-anchor="middle" dy="${dy}" font-size="11" font-weight="bold" fill="white" pointer-events="none">${n.m.receivedChoices}</text>`;
+      }
+
+      // Pulse % (sadece normal modda)
+      if (SOCIO_SHOW_PULSE && pulseScore!==null && SOCIO_VIEW_MODE==='normal') {
+        html+=`<text text-anchor="middle" dy="${sz+24}" font-size="9" fill="${ringColor||'#888'}" font-weight="700" pointer-events="none">${pulseScore}%</text>`;
+      }
+
+      // Risk modu: risk skoru göster
+      if (SOCIO_VIEW_MODE==='risk') {
+        const m=project.analysis.personMetrics.find(x=>x.participantId===n.id);
+        const ps=getPulseScore(n.id);
+        let r2=0;
+        if(m?.isolationType==='tam')r2+=40;else if(m?.isolationType==='tek-yonlu')r2+=20;
+        if((m?.receivedRejections||0)>=3)r2+=20;else if((m?.receivedRejections||0)>=1)r2+=10;
+        if(ps!==null){if(ps<40)r2+=40;else if(ps<60)r2+=20;else if(ps<75)r2+=10;}
+        r2=Math.min(r2,100);
+        if (r2>0) html+=`<text text-anchor="middle" dy="${sz+14}" font-size="9" fill="${fill}" font-weight="800" pointer-events="none">⚠${r2}</text>`;
+      }
+
+      const labelDy=(SOCIO_SHOW_PULSE&&pulseScore!==null&&SOCIO_VIEW_MODE==='normal')?sz+34:sz+13;
+      const label=esc(n.code||n.label.split(' ')[0]);
+      html+=`<text text-anchor="middle" dy="${labelDy}" font-size="10" fill="#555" pointer-events="none">${label}</text>`;
+      html+=`</g>`;
+    }
+
+    svg.innerHTML=html;
+
+    // Düğüm event'leri
+    svg.querySelectorAll('.snode').forEach(g=>{
+      g.addEventListener('mousedown', e=>{
+        // Kement modda: seçili düğüm yoksa yalnızca alan çizimine izin ver
+        if (SOCIO_DRAG_MODE==='lasso' && SOCIO_LASSO_SEL.size===0) return;
+        SOCIO_DRAG=g.dataset.id;
+        const r=svg.getBoundingClientRect();
+        const nd=SOCIO_NODES.find(n=>n.id===SOCIO_DRAG);
+        const scX=SOCIO_W/r.width, scY=SOCIO_H/r.height;
+        SOCIO_DRAG_OFF={x:(e.clientX-r.left)*scX-nd.x, y:(e.clientY-r.top)*scY-nd.y};
+
+        // Grup modu: bağlı düğümlerin offset anlık görüntüsü
+        if (SOCIO_DRAG_MODE==='group') {
+          const connIds=getConnectedIds(SOCIO_DRAG);
+          SOCIO_DRAG_SNAPSHOT={};
+          for (const cid of connIds) {
+            const cn=SOCIO_NODES.find(n=>n.id===cid);
+            if (cn) SOCIO_DRAG_SNAPSHOT[cid]={dx:cn.x-nd.x, dy:cn.y-nd.y};
+          }
+        } else if (SOCIO_DRAG_MODE==='lasso' && SOCIO_LASSO_SEL.size>0) {
+          // Kement seçili düğümler grupça sürüklenir
+          SOCIO_DRAG_SNAPSHOT={};
+          for (const cid of SOCIO_LASSO_SEL) {
+            const cn=SOCIO_NODES.find(n=>n.id===cid);
+            if (cn) SOCIO_DRAG_SNAPSHOT[cid]={dx:cn.x-nd.x, dy:cn.y-nd.y};
+          }
+        } else {
+          SOCIO_DRAG_SNAPSHOT=null;
+        }
+
+        if(SOCIO_ANIM) cancelAnimationFrame(SOCIO_ANIM);
+        e.preventDefault();
+      });
+
+      g.addEventListener('click', e=>{
+        if (SOCIO_DRAG_MODE==='lasso') return;
+        if (Math.abs(e.movementX)+Math.abs(e.movementY)<3) {
+          const id=g.dataset.id;
+          if (SOCIO_SPOTLIGHT===id) { SOCIO_SPOTLIGHT=null; closeDetailPanel(); }
+          else { SOCIO_SPOTLIGHT=id; showDetailPanel(project,id); }
+          drawSVG();
+        }
+      });
+    });
+  }
+
+  // ── Detay Paneli ────────────────────────────────────────────────────────
+  function showDetailPanel(project, pid) {
+    const panel=document.getElementById('socio-detail-panel');
+    const content=document.getElementById('socio-detail-content');
+    if (!panel||!content) return;
+    const p=project.participants.find(x=>x.id===pid);
+    const metric=project.analysis.personMetrics.find(x=>x.participantId===pid);
+    const pulseScore=getPulseScore(pid);
+    const ringColor=pulseRingColor(pulseScore);
+    const rels=getFilteredRelations(currentFilter);
+    const choosers=rels.filter(r=>r.to===pid&&r.type==='seçim').map(r=>participantName(project,r.from));
+    const rejecters=rels.filter(r=>r.to===pid&&r.type==='itme').map(r=>participantName(project,r.from));
+    const chosen=rels.filter(r=>r.from===pid&&r.type==='seçim').map(r=>participantName(project,r.to));
+    const rejected=rels.filter(r=>r.from===pid&&r.type==='itme').map(r=>participantName(project,r.to));
+    const rc=metric?.receivedChoices||0, rr=metric?.receivedRejections||0,
+          sc=metric?.sentChoices||0, sss=metric?.sss||0;
+    let statusLabel='Ortalama', statusColor='#64748b';
+    if(rc===0&&sc===0&&rr===0){statusLabel='🔴 İzole';statusColor='#c0392b';}
+    else if(sss>=0.3&&rr<=1){statusLabel='⭐ Yıldız';statusColor='#0e7c5b';}
+    else if(rr>=3&&rc<=1){statusLabel='⚠ İhmal';statusColor='#b45309';}
+    else if(rc>=2&&rr>=2){statusLabel='↕ Tartışmalı';statusColor='#7c3aed';}
+
+    // Pulse boyutları
+    let pulseDimsHtml='';
+    const PDL={'psikolojik-guvenlik':'Psikolojik Güvenlik','motivasyon':'Motivasyon','is-yuku':'İş Yükü','takim-uyumu':'Takım Uyumu','yonetici-iliskisi':'Yönetici İlişkisi','genel':'Genel'};
+    if (pm) {
+      const resp=project.responses.find(r=>r.respondentId===pid&&r.status!=='excluded');
+      if (resp) {
+        const dimScores={};
+        for (const q of project.questions) {
+          if(q.category!=='pulse-scale') continue;
+          const ans=(resp.answers||[]).find(a=>a.questionId===q.id);
+          if(ans?.numericValue!==undefined){
+            const dim=q.pulseDimension||'genel';
+            const pct=Math.round((ans.numericValue/(q.pulseMax||5))*100);
+            if(!dimScores[dim])dimScores[dim]=[];
+            dimScores[dim].push(pct);
+          }
+        }
+        if(Object.keys(dimScores).length) {
+          pulseDimsHtml=`<div style="margin-top:12px;">
+            <div style="font-size:11px;font-weight:800;color:var(--pulse);letter-spacing:.06em;margin-bottom:8px;">💜 PULSE BOYUTLARI</div>
+            ${Object.entries(dimScores).map(([dim,vals])=>{
+              const avg=Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
+              const col=avg>=75?'#0e7c5b':avg>=50?'#b45309':'#c0392b';
+              return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
+                <div style="font-size:11px;width:130px;flex-shrink:0;">${esc(PDL[dim]||dim)}</div>
+                <div style="flex:1;height:6px;background:var(--surface2);border-radius:99px;">
+                  <div style="width:${avg}%;height:100%;border-radius:99px;background:${col};"></div>
+                </div>
+                <div style="font-size:11px;font-weight:700;color:${col};width:30px;">${avg}%</div>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }
+      }
+    }
+
+    // Risk skoru
+    let risk=0;
+    if(metric?.isolationType==='tam')risk+=40;else if(metric?.isolationType==='tek-yonlu')risk+=20;
+    if(rr>=3)risk+=20;else if(rr>=1)risk+=10;
+    if(pulseScore!==null){if(pulseScore<40)risk+=40;else if(pulseScore<60)risk+=20;else if(pulseScore<75)risk+=10;}
+    risk=Math.min(risk,100);
+    const riskColor=risk>=70?'#c0392b':risk>=40?'#b45309':'#0e7c5b';
+    let intervention='Düşük risk. Mevcut durumu koruyarak izle.';
+    if(risk>=70){if(metric?.isolationType==='tam')intervention='Öncelikli: Birebir görüşme, mentor eşleştir.';else if(metric?.isolationType==='tek-yonlu')intervention='Sosyal bağ kurmada destekle, geri bildirim fırsatları yarat.';else intervention='İş yükü ve rol beklentilerini gözden geçir.';}
+    else if(risk>=40){if(sss>=0.3)intervention='Yıldız kişi yorulmuş olabilir, rol dağılımını gözden geçir.';else intervention='Cross-team aktivite veya ortak proje öner.';}
+
+    content.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-size:18px;font-weight:800;">${esc(p?.values.fullName||'—')}</div>
+        <button onclick="closeDetailPanel()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);">×</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+        <span style="background:${statusColor}22;color:${statusColor};padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;">${statusLabel}</span>
+        ${p?.values.gender?`<span style="background:var(--surface2);padding:3px 10px;border-radius:99px;font-size:12px;">${esc(p.values.gender)}</span>`:''}
+      </div>
+      <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;">📊 SOSYOMETRİ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:var(--muted);">Aldığı Seçim</div><div style="font-size:18px;font-weight:800;color:#0e7c5b;">${rc}</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:var(--muted);">Aldığı İtme</div><div style="font-size:18px;font-weight:800;color:#c0392b;">${rr}</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:var(--muted);">Yaptığı Seçim</div><div style="font-size:18px;font-weight:800;">${sc}</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:8px 10px;"><div style="font-size:10px;color:var(--muted);">SSS Skoru</div><div style="font-size:18px;font-weight:800;color:${sss>=0?'#0e7c5b':'#c0392b'};">${sss>0?'+':''}${sss}</div></div>
+      </div>
+      ${choosers.length?`<div style="font-size:12px;margin-bottom:4px;"><strong style="color:#0e7c5b;">↗ Kim seçti (${choosers.length}):</strong> ${esc(choosers.join(', '))}</div>`:''}
+      ${chosen.length?`<div style="font-size:12px;margin-bottom:4px;"><strong>→ Kimleri seçti (${chosen.length}):</strong> ${esc(chosen.join(', '))}</div>`:''}
+      ${rejecters.length?`<div style="font-size:12px;margin-bottom:4px;"><strong style="color:#c0392b;">✗ Kim itti (${rejecters.length}):</strong> ${esc(rejecters.join(', '))}</div>`:''}
+      ${rejected.length?`<div style="font-size:12px;margin-bottom:4px;"><strong style="color:#c0392b;">→ Kimleri itti (${rejected.length}):</strong> ${esc(rejected.join(', '))}</div>`:''}
+      <div style="height:1px;background:var(--border);margin:12px 0;"></div>
+      ${pulseScore!==null?`
+        <div style="font-size:11px;font-weight:800;color:var(--pulse);letter-spacing:.06em;margin-bottom:8px;">💜 PULSE SKORU</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="flex:1;height:10px;background:var(--surface2);border-radius:99px;">
+            <div style="width:${pulseScore}%;height:100%;border-radius:99px;background:${ringColor};"></div>
+          </div>
+          <strong style="font-size:20px;color:${ringColor};">${pulseScore}</strong>
+          <span style="font-size:12px;color:var(--muted);">/100</span>
+        </div>
+        ${pulseDimsHtml}
+      `:`<div style="font-size:12px;color:var(--muted);padding:10px;background:var(--surface2);border-radius:8px;">Pulse verisi girilmemiş.</div>`}
+      <div style="height:1px;background:var(--border);margin:12px 0;"></div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;margin-bottom:8px;color:${riskColor};">🎯 MÜDAHALe — Risk: ${risk}/100</div>
+      <div style="background:${riskColor}18;border:1px solid ${riskColor}44;border-radius:10px;padding:12px;font-size:13px;line-height:1.6;">${esc(intervention)}</div>`;
+
+    panel.style.width='320px';
+  }
+
+  window.closeDetailPanel=function(){
+    const panel=document.getElementById('socio-detail-panel');
+    if(panel) panel.style.width='0';
+    SOCIO_SPOTLIGHT=null; drawSVG();
+  };
+
+  // ── Mod değiştirme ───────────────────────────────────────────────────────
+  function setDragMode(mode) {
+    SOCIO_DRAG_MODE=mode;
+    SOCIO_LASSO_SEL.clear();
+    SOCIO_LASSO={active:false,x0:0,y0:0,x1:0,y1:0};
+    document.querySelectorAll('.socio-mode-btn').forEach(b=>b.classList.remove('active'));
+    const btn=document.getElementById('mode-'+mode);
+    if(btn) btn.classList.add('active');
+    const label=document.getElementById('socio-mode-label');
+    if(label) {
+      const desc={
+        free:'<strong style="color:var(--accent);">Serbest</strong> — Tek düğümü sürükle',
+        group:'<strong style="color:var(--accent);">Grup</strong> — Bağlı düğümler birlikte hareket eder',
+        lasso:'<strong style="color:var(--accent);">Kement</strong> — Alan çiz, seçilenleri birlikte taşı',
+        physics:'<strong style="color:var(--accent);">Fizik</strong> — Seçimler çeker, itmeler iter'
+      };
+      label.innerHTML='Mod: '+desc[mode];
+    }
+    svg.style.cursor=mode==='lasso'?'crosshair':'default';
+    drawSVG();
+  }
+
+  function setViewMode(mode) {
+    SOCIO_VIEW_MODE=mode;
+    document.querySelectorAll('.socio-view-btn').forEach(b=>b.classList.remove('active'));
+    const btn=document.getElementById('view-'+mode);
+    if(btn) btn.classList.add('active');
+    drawSVG();
+  }
+
+  // ── Force simulation ─────────────────────────────────────────────────────
+  function runForce() {
+    if(SOCIO_ANIM) cancelAnimationFrame(SOCIO_ANIM);
+    let frame=0;
+    function tick(){
+      if(frame++>150) return;
+      const nmap=new Map(SOCIO_NODES.map(n=>[n.id,n]));
+      for(let i=0;i<SOCIO_NODES.length;i++){
+        SOCIO_NODES[i].vx=0; SOCIO_NODES[i].vy=0;
+        for(let j=0;j<SOCIO_NODES.length;j++){
+          if(i===j) continue;
+          const dx=SOCIO_NODES[i].x-SOCIO_NODES[j].x, dy=SOCIO_NODES[i].y-SOCIO_NODES[j].y;
+          const d=Math.sqrt(dx*dx+dy*dy)||1, f=3500/(d*d);
+          SOCIO_NODES[i].vx+=dx/d*f; SOCIO_NODES[i].vy+=dy/d*f;
+        }
+      }
+      for(const e of SOCIO_EDGES){
+        const a=nmap.get(e.from), b=nmap.get(e.to); if(!a||!b) continue;
+        const dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||1, f=(d-110)*.02;
+        a.vx+=dx/d*f; a.vy+=dy/d*f; b.vx-=dx/d*f; b.vy-=dy/d*f;
+      }
+      for(const n of SOCIO_NODES){
+        n.vx+=(SOCIO_W/2-n.x)*.004; n.vy+=(SOCIO_H/2-n.y)*.004;
+        n.x=Math.max(40,Math.min(SOCIO_W-40,n.x+n.vx*.5));
+        n.y=Math.max(40,Math.min(SOCIO_H-40,n.y+n.vy*.5));
+      }
+      drawSVG();
+      SOCIO_ANIM=requestAnimationFrame(tick);
+    }
+    SOCIO_ANIM=requestAnimationFrame(tick);
+  }
+
+  // ── Mouse olayları ───────────────────────────────────────────────────────
+  let lassoStartSVG={x:0,y:0};
+
+  function svgCoords(e) {
+    const r=svg.getBoundingClientRect();
+    return {
+      x:(e.clientX-r.left)*(SOCIO_W/r.width),
+      y:(e.clientY-r.top)*(SOCIO_H/r.height)
+    };
+  }
+
+  svg.addEventListener('mousedown', e=>{
+    if(SOCIO_DRAG_MODE!=='lasso') return;
+    if(e.target.closest('.snode')) return; // düğüme tıklandıysa pas geç
+    const sc=svgCoords(e);
+    SOCIO_LASSO={active:true,x0:sc.x,y0:sc.y,x1:sc.x,y1:sc.y};
+    lassoStartSVG=sc;
+    SOCIO_LASSO_SEL.clear();
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e=>{
+    if(SOCIO_DRAG) {
+      const r=svg.getBoundingClientRect();
+      const scX=SOCIO_W/r.width, scY=SOCIO_H/r.height;
+      const nx=Math.max(40,Math.min(SOCIO_W-40,(e.clientX-r.left)*scX-SOCIO_DRAG_OFF.x));
+      const ny=Math.max(40,Math.min(SOCIO_H-40,(e.clientY-r.top)*scY-SOCIO_DRAG_OFF.y));
+      const n=SOCIO_NODES.find(n=>n.id===SOCIO_DRAG);
+      if(!n) return;
+      if((SOCIO_DRAG_MODE==='group'||SOCIO_DRAG_MODE==='lasso') && SOCIO_DRAG_SNAPSHOT) {
+        // Tüm bağlı/seçili düğümleri birlikte taşı
+        for(const[cid,off] of Object.entries(SOCIO_DRAG_SNAPSHOT)){
+          const cn=SOCIO_NODES.find(x=>x.id===cid);
+          if(cn){cn.x=Math.max(40,Math.min(SOCIO_W-40,nx+off.dx));cn.y=Math.max(40,Math.min(SOCIO_H-40,ny+off.dy));}
+        }
+      } else if(SOCIO_DRAG_MODE==='physics') {
+        // Fizik modu: önce sürüklenen kişiyi taşı
+        n.x=nx; n.y=ny;
+        // Sonra bağlı kişilere kuvvet uygula
+        const ATTRACT=0.12, REPEL=0.10;
+        for(const e of SOCIO_EDGES){
+          let otherId=null, isAttract=false;
+          if(e.from===SOCIO_DRAG){ otherId=e.to; isAttract=(e.type==='seçim'); }
+          else if(e.to===SOCIO_DRAG){ otherId=e.from; isAttract=(e.type==='seçim'); }
+          if(!otherId) continue;
+          const other=SOCIO_NODES.find(x=>x.id===otherId);
+          if(!other) continue;
+          const dx=n.x-other.x, dy=n.y-other.y;
+          const dist=Math.sqrt(dx*dx+dy*dy)||1;
+          if(isAttract){
+            // Seçim → çek: diğer kişi sürüklenen kişiye doğru gelir
+            const force=ATTRACT*(dist>120?1:0.3); // çok yakınsa hafif çek
+            other.x=Math.max(40,Math.min(SOCIO_W-40,other.x+dx/dist*force*20));
+            other.y=Math.max(40,Math.min(SOCIO_H-40,other.y+dy/dist*force*20));
+          } else {
+            // İtme → it: diğer kişi sürüklenen kişiden uzaklaşır
+            const force=REPEL*(dist<150?1:0.2); // uzaktaysa zayıf it
+            other.x=Math.max(40,Math.min(SOCIO_W-40,other.x-dx/dist*force*20));
+            other.y=Math.max(40,Math.min(SOCIO_H-40,other.y-dy/dist*force*20));
+          }
+        }
+      } else {
+        n.x=nx; n.y=ny;
+      }
+      drawSVG();
+    } else if(SOCIO_DRAG_MODE==='lasso' && SOCIO_LASSO.active) {
+      const sc=svgCoords(e);
+      SOCIO_LASSO.x1=sc.x; SOCIO_LASSO.y1=sc.y;
+      // Hangi düğümler kement içinde?
+      const lx0=Math.min(SOCIO_LASSO.x0,sc.x), lx1=Math.max(SOCIO_LASSO.x0,sc.x);
+      const ly0=Math.min(SOCIO_LASSO.y0,sc.y), ly1=Math.max(SOCIO_LASSO.y0,sc.y);
+      SOCIO_LASSO_SEL.clear();
+      for(const n of SOCIO_NODES){
+        if(n.x>=lx0&&n.x<=lx1&&n.y>=ly0&&n.y<=ly1) SOCIO_LASSO_SEL.add(n.id);
+      }
+      drawSVG();
+    }
+  });
+
+  document.addEventListener('mouseup', ()=>{
+    SOCIO_DRAG=null;
+    SOCIO_DRAG_SNAPSHOT=null;
+    if(SOCIO_LASSO.active){
+      SOCIO_LASSO.active=false;
+      // Kement bitti: seçili düğümler SOCIO_LASSO_SEL'de kalır, birlikte taşınabilir
+      drawSVG();
+    }
+  });
+
+  // ── Kontroller ───────────────────────────────────────────────────────────
+  document.getElementById('mode-free')?.addEventListener('click', ()=>setDragMode('free'));
+  document.getElementById('mode-group')?.addEventListener('click', ()=>setDragMode('group'));
+  document.getElementById('mode-lasso')?.addEventListener('click', ()=>setDragMode('lasso'));
+  document.getElementById('mode-physics')?.addEventListener('click', ()=>setDragMode('physics'));
+  document.getElementById('view-normal')?.addEventListener('click', ()=>setViewMode('normal'));
+  document.getElementById('view-risk')?.addEventListener('click', ()=>setViewMode('risk'));
+
+  const filterSel=document.getElementById('socio-filter');
+  if(filterSel) filterSel.onchange=()=>{
+    currentFilter=filterSel.value; SOCIO_SPOTLIGHT=null; closeDetailPanel();
+    buildEdges(currentFilter); refreshNodeMetrics(); drawSVG();
+  };
+
+  const searchInput=document.getElementById('socio-search');
+  if(searchInput) searchInput.oninput=()=>{
+    const q=searchInput.value.trim().toLowerCase();
+    if(!q){SOCIO_SPOTLIGHT=null;drawSVG();return;}
+    const found=SOCIO_NODES.find(n=>n.label.toLowerCase().includes(q));
+    if(found){SOCIO_SPOTLIGHT=found.id;showDetailPanel(project,found.id);drawSVG();}
+  };
+
+  const pulseToggle=document.getElementById('pulse-layer-toggle');
+  if(pulseToggle){
+    SOCIO_SHOW_PULSE=pulseToggle.checked;
+    pulseToggle.onchange=()=>{SOCIO_SHOW_PULSE=pulseToggle.checked;drawSVG();};
+  }
+
+  document.getElementById('reset-socio-layout')?.addEventListener('click', ()=>{
+    SOCIO_SPOTLIGHT=null; SOCIO_LASSO_SEL.clear(); closeDetailPanel();
+    initNodes(); buildEdges(currentFilter); runForce();
+  });
+
+  const dlBtn=document.getElementById('download-svg-btn');
+  if(dlBtn) dlBtn.onclick=()=>{
+    const svgEl=document.getElementById('socio-svg'); if(!svgEl) return;
+    const svgData=new XMLSerializer().serializeToString(svgEl);
+    const canvas=document.createElement('canvas'); canvas.width=1800; canvas.height=1240;
+    const ctx=canvas.getContext('2d'); ctx.fillStyle='#f8fbff'; ctx.fillRect(0,0,1800,1240);
+    const img=new Image();
+    const blob=new Blob([svgData],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    img.onload=()=>{ctx.drawImage(img,0,0,1800,1240);URL.revokeObjectURL(url);const a=document.createElement('a');a.download='sosyogram.png';a.href=canvas.toDataURL('image/png');a.click();};
+    img.src=url;
+  };
+
+  // ── Başlat ───────────────────────────────────────────────────────────────
+  initNodes(); buildEdges(currentFilter); runForce();
+}
+
+function calcRiskScore(metric, pulseScore) {
+  if (!metric) return 0;
+  let risk = 0;
+  if (metric.isolationType === 'tam') risk += 40;
+  else if (metric.isolationType === 'tek-yonlu') risk += 20;
+  if ((metric.receivedRejections || 0) >= 3) risk += 20;
+  else if ((metric.receivedRejections || 0) >= 1) risk += 10;
+  if (pulseScore !== null && pulseScore !== undefined) {
+    if (pulseScore < 40) risk += 40;
+    else if (pulseScore < 60) risk += 20;
+    else if (pulseScore < 75) risk += 10;
+  }
+  return Math.min(risk, 100);
+}
+
+function getRuleBasedIntervention(metric, pulseScore) {
+  const sss = metric?.sss || 0;
+  const iso = metric?.isolationType;
+  const rr = metric?.receivedRejections || 0;
+  const risk = calcRiskScore(metric, pulseScore);
+
+  if (risk >= 70) {
+    if (iso === 'tam') return { oncelik: '🔴 Acil', eylem: 'Birebir görüşme planla', detay: 'Güvenilir bir mentorla eşleştir. Neden izole olduğunu anlamak için birebir, yargısız bir görüşme yap. Küçük grup aktivitelerine kademeli dahil et.' };
+    if (iso === 'tek-yonlu') return { oncelik: '🔴 Acil', eylem: 'Sosyal bağ kurmasını destekle', detay: 'Seçim yaptığı kişilerle ortak proje/görev ver. Olumlu geri bildirim fırsatları yarat. Neden karşılık görmediğini anlamak için grup dinamiklerini gözlemle.' };
+    if (rr >= 3) return { oncelik: '🔴 Acil', eylem: 'Çatışma analizi yap', detay: 'Yüksek itilme + düşük pulse ciddi çatışma ya da iş yükü sorununa işaret ediyor. Bireysel görüşme ve gerekirse arabuluculuk süreci başlat.' };
+    return { oncelik: '🔴 Acil', eylem: 'Destek görüşmesi planla', detay: 'Düşük pulse skoru ve olumsuz sosyometrik konum birlikte değerlendirilmeli. İş yükü, rol beklentisi ve takım ilişkileri üçgeninde kapsamlı görüşme yap.' };
+  }
+  if (risk >= 40) {
+    if (sss >= 0.3) return { oncelik: '🟡 Orta', eylem: 'Overload riskini değerlendir', detay: 'Merkezi kişi yoruluyor olabilir. Üstlendiği resmi/gayri resmi rolleri listele. Gerekirse sorumluluk devri planla. Pulse takibini sıklaştır.' };
+    if (iso) return { oncelik: '🟡 Orta', eylem: 'Köprü ilişkisi kur', detay: 'Cross-team aktivite veya ortak proje öner. İzole kişiyi merkezi bir kişiyle eşleştirerek dolaylı ağ bağlantısı yarat.' };
+    return { oncelik: '🟡 Orta', eylem: 'Periyodik takip başlat', detay: 'Pulse skorunu 2 haftada bir izle. Düşüş devam ederse bireysel görüşmeye geç. Takım aktivitelerine katılımını artır.' };
+  }
+  if (sss >= 0.3 && (pulseScore === null || pulseScore >= 75)) {
+    return { oncelik: '🟢 İyi', eylem: 'Mentor/model olarak konumlandır', detay: 'Yıldız kişi ve yüksek pulse skoru. Yeni üyelere mentor olabilir, bilgi paylaşım etkinliklerinde öne çıkarılabilir.' };
+  }
+  return { oncelik: '🟢 Düşük', eylem: 'İzlemeye devam', detay: 'Mevcut durumu koru. Periyodik pulse ile takipte kal.' };
+}
+
+function renderMudahalePage(project) {
+  const an = project.analysis;
+  const metrics = an.personMetrics || [];
+  const pm = an.pulseMetrics || null;
+  const active = project.participants.filter(p => p.active);
+
+  if (!an.calculatedAt) {
+    return `<div class="page-header"><div><h2 class="page-title">🎯 Müdahale Öneri Motoru</h2><p class="page-subtitle">Sosyometri + Pulse verilerini birleştirerek kişiselleştirilmiş aksiyon önerileri üretir.</p></div></div>
+    <div class="empty"><div class="empty-icon">🎯</div><div class="empty-title">Önce analizi çalıştır</div><div class="empty-desc">Analiz sayfasına gidip "Analizi Çalıştır" butonuna bas.</div></div>`;
+  }
+
+  // Risk tablosu oluştur
+  const riskData = metrics.map(m => {
+    const pulseScore = pm?.personPulseScores?.[m.participantId] ?? null;
+    const risk = calcRiskScore(m, pulseScore);
+    const intervention = getRuleBasedIntervention(m, pulseScore);
+    return { ...m, pulseScore, risk, intervention };
+  }).sort((a, b) => b.risk - a.risk);
+
+  const acil = riskData.filter(d => d.risk >= 70);
+  const orta = riskData.filter(d => d.risk >= 40 && d.risk < 70);
+  const iyi = riskData.filter(d => d.risk < 40);
+
+  function riskCard(d) {
+    const p = active.find(x => x.id === d.participantId);
+    const name = p?.values.fullName || '—';
+    const riskColor = d.risk >= 70 ? '#c0392b' : d.risk >= 40 ? '#b45309' : '#0e7c5b';
+    const riskBg = d.risk >= 70 ? '#fde8e6' : d.risk >= 40 ? '#fef3c7' : '#d1fae5';
+    return `
+      <div style="border:1px solid ${riskColor}44;border-radius:14px;padding:16px;background:var(--surface);margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:16px;font-weight:800;">${esc(name)}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+              SSS: ${d.sss > 0 ? '+' : ''}${d.sss} &nbsp;·&nbsp;
+              Seçildi: ${d.receivedChoices} &nbsp;·&nbsp;
+              İtildi: ${d.receivedRejections}
+              ${d.pulseScore !== null ? ` &nbsp;·&nbsp; Pulse: ${d.pulseScore}/100` : ' &nbsp;·&nbsp; Pulse: —'}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="background:${riskBg};color:${riskColor};padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;">${d.intervention.oncelik}</span>
+            <div style="width:48px;height:48px;border-radius:50%;background:${riskBg};border:3px solid ${riskColor};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${riskColor};">${d.risk}</div>
+          </div>
+        </div>
+        <div style="background:${riskBg};border-radius:10px;padding:12px;">
+          <div style="font-size:12px;font-weight:800;color:${riskColor};margin-bottom:4px;">⚡ ${esc(d.intervention.eylem)}</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6;">${esc(d.intervention.detay)}</div>
+        </div>
+        ${d.isolationType ? `<div style="margin-top:8px;font-size:12px;color:var(--muted);">İzolasyon: <strong style="color:var(--warning);">${d.isolationType === 'tam' ? '🔴 Tam İzole' : '🟡 Tek Yönlü İzole'}</strong></div>` : ''}
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-soft" style="font-size:12px;padding:5px 12px;" data-ai-pid="${d.participantId}">🤖 AI Öneri Al</button>
+        </div>
+        <div id="ai-result-${d.participantId}" style="margin-top:8px;"></div>
+      </div>`;
+  }
+
+  return `
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">🎯 Müdahale Öneri Motoru</h2>
+        <p class="page-subtitle">Sosyometri + Pulse birleşik risk analizi. Kural tabanlı + AI destekli öneriler.</p>
+      </div>
+      <div class="row">
+        <button class="btn btn-soft" id="mudahale-export">📥 Excel İndir</button>
+      </div>
+    </div>
+
+    <!-- Özet istatistikler -->
+    <div class="stats" style="margin-bottom:24px;">
+      <div class="card" style="border-left:4px solid #c0392b;">
+        <div class="muted" style="font-size:12px;">🔴 Acil Müdahale</div>
+        <div class="stat-value" style="color:#c0392b;">${acil.length}</div>
+        <div class="small muted">Risk skoru ≥ 70</div>
+      </div>
+      <div class="card" style="border-left:4px solid #b45309;">
+        <div class="muted" style="font-size:12px;">🟡 Orta Risk</div>
+        <div class="stat-value" style="color:#b45309;">${orta.length}</div>
+        <div class="small muted">Risk skoru 40–69</div>
+      </div>
+      <div class="card" style="border-left:4px solid #0e7c5b;">
+        <div class="muted" style="font-size:12px;">🟢 Düşük Risk</div>
+        <div class="stat-value" style="color:#0e7c5b;">${iyi.length}</div>
+        <div class="small muted">Risk skoru &lt; 40</div>
+      </div>
+    </div>
+
+    <!-- AI Toplu Analiz -->
+    <div class="card" style="margin-bottom:24px;border-left:4px solid var(--pulse);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--pulse);">🤖 AI Destekli Grup Analizi</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px;">Tüm verileri Claude'a gönder, grup geneli için stratejik öneriler al.</div>
+        </div>
+        <button class="btn" style="background:var(--pulse);color:white;border-color:var(--pulse);" id="ai-group-btn">Grup Analizi Yap</button>
+      </div>
+      <div id="ai-group-result" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Acil müdahale -->
+    ${acil.length ? `
+    <div class="section-title" style="color:#c0392b;font-size:14px;">🔴 ACİL MÜDAHALE GEREKTİREN (${acil.length} kişi)</div>
+    ${acil.map(d => riskCard(d)).join('')}` : ''}
+
+    <!-- Orta risk -->
+    ${orta.length ? `
+    <div class="section-title" style="color:#b45309;font-size:14px;margin-top:20px;">🟡 ORTA RİSK (${orta.length} kişi)</div>
+    ${orta.map(d => riskCard(d)).join('')}` : ''}
+
+    <!-- İyi durum -->
+    ${iyi.length ? `
+    <div class="section-title" style="color:#0e7c5b;font-size:14px;margin-top:20px;">🟢 DÜŞÜK RİSK (${iyi.length} kişi)</div>
+    ${iyi.map(d => riskCard(d)).join('')}` : ''}
+  `;
+}
+
+function bindMudahalePage(project) {
+  const an = project.analysis;
+  const metrics = an.personMetrics || [];
+  const pm = an.pulseMetrics || null;
+  const active = project.participants.filter(p => p.active);
+
+  // Excel export
+  const exportBtn = document.getElementById('mudahale-export');
+  if (exportBtn) {
+    exportBtn.onclick = () => {
+      const rows = metrics.map(m => {
+        const pulseScore = pm?.personPulseScores?.[m.participantId] ?? null;
+        const risk = calcRiskScore(m, pulseScore);
+        const iv = getRuleBasedIntervention(m, pulseScore);
+        return {
+          kisi: participantName(project, m.participantId),
+          sss: m.sss || 0,
+          aldigi_secim: m.receivedChoices,
+          aldigi_itme: m.receivedRejections,
+          izolasyon: m.isolationType || '—',
+          pulse_skoru: pulseScore ?? '—',
+          risk_skoru: risk,
+          oncelik: iv.oncelik,
+          eylem: iv.eylem,
+          detay: iv.detay
+        };
+      }).sort((a, b) => b.risk_skoru - a.risk_skoru);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Mudahale_Onerileri');
+      XLSX.writeFile(wb, `${project.name}_mudahale.xlsx`);
+    };
+  }
+
+  // Bireysel AI önerisi
+  document.querySelectorAll('[data-ai-pid]').forEach(btn => {
+    btn.onclick = async () => {
+      const pid = btn.dataset.aiPid;
+      const resultDiv = document.getElementById('ai-result-' + pid);
+      const m = metrics.find(x => x.participantId === pid);
+      const p = active.find(x => x.id === pid);
+      const pulseScore = pm?.personPulseScores?.[pid] ?? null;
+      const risk = calcRiskScore(m, pulseScore);
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Analiz ediliyor…';
+      resultDiv.innerHTML = '';
+
+      // Pulse boyut skorları
+      const resp = project.responses.find(r => r.respondentId === pid && r.status !== 'excluded');
+      const dimScores = {};
+      const PULSE_DIM_LABELS = { 'psikolojik-guvenlik': 'Psikolojik Güvenlik', 'motivasyon': 'Motivasyon', 'is-yuku': 'İş Yükü', 'takim-uyumu': 'Takım Uyumu', 'yonetici-iliskisi': 'Yönetici İlişkisi', 'genel': 'Genel' };
+      if (resp) {
+        for (const q of project.questions.filter(q => q.category === 'pulse-scale')) {
+          const ans = (resp.answers || []).find(a => a.questionId === q.id);
+          if (ans && ans.numericValue !== undefined) {
+            const dim = q.pulseDimension || 'genel';
+            const pct = Math.round((ans.numericValue / (q.pulseMax || 5)) * 100);
+            if (!dimScores[dim]) dimScores[dim] = [];
+            dimScores[dim].push(pct);
+          }
+        }
+      }
+      const dimSummary = Object.entries(dimScores).map(([dim, vals]) => {
+        const avg = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+        return `${PULSE_DIM_LABELS[dim] || dim}: ${avg}/100`;
+      }).join(', ');
+
+      const prompt = `Sen bir takım gelişimi ve organizasyon psikolojisi uzmanısın. Aşağıdaki kişinin sosyometri ve pulse survey verilerini analiz et ve somut, uygulanabilir müdahale önerileri sun.
+
+KİŞİ: ${p?.values.fullName || '—'} (${p?.values.gender || '—'})
+KURUM: ${project.institution.name || '—'}, ${project.institution.unit || '—'}
+
+SOSYOMETRİ VERİLERİ:
+- Aldığı seçim: ${m?.receivedChoices || 0}
+- Aldığı itme: ${m?.receivedRejections || 0}
+- Yaptığı seçim: ${m?.sentChoices || 0}
+- SSS Skoru: ${m?.sss || 0} (−1 ile +1 arası, yüksek = pozitif statü)
+- İzolasyon türü: ${m?.isolationType || 'yok'}
+- Karşılıklı seçim sayısı: ${m?.mutualChoices || 0}
+
+PULSE VERİLERİ:
+- Genel pulse skoru: ${pulseScore !== null ? pulseScore + '/100' : 'veri yok'}
+${dimSummary ? '- Boyut skorları: ' + dimSummary : ''}
+
+BİRLEŞİK RİSK SKORU: ${risk}/100
+
+Lütfen şunları ver:
+1. Bu veriler ne anlatıyor? (2-3 cümle, net ve somut)
+2. Kısa vadeli müdahale (bu hafta yapılabilecek 1-2 somut adım)
+3. Orta vadeli müdahale (1-3 ay içinde)
+4. Dikkat edilmesi gereken risk faktörleri
+
+Türkçe yaz. Akademik değil, pratik ve uygulanabilir ol.`;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const data = await response.json();
+        const text = data.content?.map(c => c.text || '').join('') || 'Yanıt alınamadı.';
+        resultDiv.innerHTML = `
+          <div style="background:var(--pulse-soft);border:1px solid var(--pulse);border-radius:10px;padding:14px;margin-top:8px;">
+            <div style="font-size:11px;font-weight:800;color:var(--pulse);margin-bottom:8px;">🤖 AI ANALİZİ</div>
+            <div style="font-size:13px;line-height:1.7;white-space:pre-wrap;">${esc(text)}</div>
+          </div>`;
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="error">AI bağlantı hatası: ${esc(err.message)}</div>`;
+      }
+      btn.disabled = false;
+      btn.textContent = '🤖 AI Öneri Al';
+    };
+  });
+
+  // Grup AI analizi
+  const groupBtn = document.getElementById('ai-group-btn');
+  if (groupBtn) {
+    groupBtn.onclick = async () => {
+      const resultDiv = document.getElementById('ai-group-result');
+      groupBtn.disabled = true;
+      groupBtn.textContent = '⏳ Analiz ediliyor…';
+      resultDiv.innerHTML = '';
+
+      const riskData = metrics.map(m => {
+        const pulseScore = pm?.personPulseScores?.[m.participantId] ?? null;
+        const risk = calcRiskScore(m, pulseScore);
+        return { isim: participantName(project, m.participantId), sss: m.sss, rc: m.receivedChoices, rr: m.receivedRejections, iso: m.isolationType || 'yok', pulse: pulseScore, risk };
+      }).sort((a, b) => b.risk - a.risk);
+
+      const gm = an.groupMetrics || {};
+      const prompt = `Sen bir takım gelişimi uzmanısın. Aşağıdaki takımın sosyometri ve pulse survey sonuçlarını analiz et.
+
+KURUM: ${project.institution.name || '—'}, ${project.institution.unit || '—'}
+TAKIM BÜYÜKLÜĞü: ${active.length} kişi
+KATILIM ORANI: %${Math.round((gm.participationRate || 0) * 100)}
+AĞ YOĞUNLUĞU: %${gm.networkDensity || 0}
+KARŞILIKLI SEÇİM ORANI: %${gm.mutualRate || 0}
+TAM İZOLE KİŞİ: ${gm.fullyIsolated?.length || 0}
+TEK YÖNLÜ İZOLE: ${gm.oneWayIsolated?.length || 0}
+YILDIZ KİŞİ: ${gm.stars?.length || 0}
+
+EN YÜKSEK RİSKLİ 5 KİŞİ:
+${riskData.slice(0, 5).map(d => `- ${d.isim}: Risk=${d.risk}, SSS=${d.sss}, Seçildi=${d.rc}, İtildi=${d.rr}, İzolasyon=${d.iso}, Pulse=${d.pulse ?? '—'}`).join('\n')}
+
+Lütfen şunları ver:
+1. Takımın genel sosyal sağlık durumu (3-4 cümle)
+2. En kritik 3 müdahale alanı (öncelik sırasıyla)
+3. Takım genelinde önerilen aktiviteler/pratikler (somut, uygulanabilir)
+4. Yöneticiye özel uyarılar
+
+Türkçe, pratik ve somut yaz.`;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1200,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const data = await response.json();
+        const text = data.content?.map(c => c.text || '').join('') || 'Yanıt alınamadı.';
+        resultDiv.innerHTML = `
+          <div style="background:var(--pulse-soft);border:1px solid var(--pulse);border-radius:10px;padding:16px;">
+            <div style="font-size:11px;font-weight:800;color:var(--pulse);margin-bottom:10px;">🤖 GRUP ANALİZİ</div>
+            <div style="font-size:13px;line-height:1.7;white-space:pre-wrap;">${esc(text)}</div>
+          </div>`;
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="error">AI bağlantı hatası: ${esc(err.message)}</div>`;
+      }
+      groupBtn.disabled = false;
+      groupBtn.textContent = 'Grup Analizi Yap';
+    };
+  }
+}
+
+
+function render() {
+  renderSidebar();
+  const view = document.getElementById('view');
+  const project = getProject();
+  if (!project) { view.innerHTML = renderProjectsPage(); bindProjectsPage(); return; }
+  let html = '';
+  if (ui.currentPage==='institution') html = renderInstitutionPage(project);
+  else if (ui.currentPage==='participants') html = renderParticipantsPage(project);
+  else if (ui.currentPage==='questions') html = renderQuestionsPage(project);
+  else if (ui.currentPage==='responses') html = renderResponsesPage(project);
+  else if (ui.currentPage==='excel') html = renderExcelPage(project);
+  else if (ui.currentPage==='googleform') html = renderGoogleFormPage(project);
+  else if (ui.currentPage==='analysis') html = renderAnalysisPage(project);
+  else if (ui.currentPage==='sociogram') html = renderSociogramPage(project);
+  else if (ui.currentPage==='mudahale') html = renderMudahalePage(project);
+  else if (ui.currentPage==='reports') html = renderReportsPage(project);
+  else html = renderInstitutionPage(project);
+  view.innerHTML = html;
+  if (ui.currentPage==='institution') bindInstitutionPage(project);
+  else if (ui.currentPage==='participants') bindParticipantsPage(project);
+  else if (ui.currentPage==='questions') bindQuestionsPage(project);
+  else if (ui.currentPage==='responses') bindResponsesPage(project);
+  else if (ui.currentPage==='excel') bindExcelPage(project);
+  else if (ui.currentPage==='googleform') bindGoogleFormPage(project);
+  else if (ui.currentPage==='analysis') bindAnalysisPage(project);
+  else if (ui.currentPage==='sociogram') bindSociogramPage(project);
+  else if (ui.currentPage==='mudahale') bindMudahalePage(project);
+  else if (ui.currentPage==='reports') bindReportsPage(project);
+}
+render();
+</script>
+
+<script>
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('install-app-btn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => { if (!deferredInstallPrompt) return; deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; deferredInstallPrompt = null; installBtn.classList.add('hidden'); });
+}
+window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); deferredInstallPrompt = event; installBtn?.classList.remove('hidden'); });
+window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; installBtn?.classList.add('hidden'); });
+if ('serviceWorker' in navigator) { window.addEventListener('load', async () => { try { await navigator.serviceWorker.register('./sw.js'); } catch (err) { console.error('SW kayıt hatası:', err); } }); }
+</script>
+</body>
+</html>
