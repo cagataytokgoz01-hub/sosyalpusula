@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Rehber Atlası — Anket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #2563eb;
+      --brand-dark: #1d4ed8;
+      --brand-soft: #eff6ff;
+      --ok: #059669;
+      --ok-soft: #ecfdf5;
+      --warn: #d97706;
+      --danger: #dc2626;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f1f5f9;
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── HEADER ── */
+    .form-header {
+      background: var(--brand);
+      padding: 20px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .form-header::after {
+      content: '';
+      position: absolute;
+      bottom: -24px; left: 0; right: 0;
+      height: 48px;
+      background: #f1f5f9;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .header-logo {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .header-brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,.8);
+      letter-spacing: .04em;
+    }
+    .header-institution {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      line-height: 1.3;
+    }
+    .header-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+      margin-top: 4px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-wrap {
+      padding: 32px 20px 12px;
+    }
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .progress-step {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      transition: background .3s;
+    }
+    .progress-step.done { background: var(--brand); }
+    .progress-step.active { background: var(--brand); opacity: .5; }
+    .progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      margin: 0 16px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .question-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    .question-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* ── KİMLİK SEÇİMİ ── */
+    .identity-method-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .identity-tab {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center;
+    }
+    .identity-tab.active {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    /* ── KİŞİ LİSTESİ ── */
+    .person-search {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface2);
+      color: var(--text);
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .person-search:focus { border-color: var(--brand); background: white; }
+
+    .person-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .person-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .15s;
+      background: var(--surface2);
+    }
+    .person-item:hover { border-color: var(--brand); background: var(--brand-soft); }
+    .person-item.selected { border-color: var(--brand); background: var(--brand-soft); }
+    .person-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 800;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .person-item.selected .person-avatar { background: var(--brand); color: white; }
+    .person-name { font-size: 14px; font-weight: 600; flex: 1; }
+    .person-group { font-size: 12px; color: var(--muted); }
+    .person-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .person-item.selected .person-check {
+      background: var(--brand);
+      border-color: var(--brand);
+    }
+    .person-item.selected .person-check::after {
+      content: '✓';
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    /* ── SOSYOMETRİ CHECKBOX ── */
+    .socio-limit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .socio-counter {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .socio-person {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 6px;
+      background: var(--surface2);
+      user-select: none;
+    }
+    .socio-person:hover:not(.disabled) { border-color: var(--brand); background: var(--brand-soft); }
+    .socio-person.checked { border-color: var(--brand); background: var(--brand-soft); }
+    .socio-person.disabled { opacity: .4; pointer-events: none; }
+    .socio-person.me { opacity: .3; pointer-events: none; font-style: italic; }
+    .socio-checkbox {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: all .15s;
+    }
+    .socio-person.checked .socio-checkbox {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: white;
+    }
+
+    /* İtme sorusu için kırmızı tema */
+    .q-itme .socio-person:hover:not(.disabled) { border-color: var(--danger); background: #fef2f2; }
+    .q-itme .socio-person.checked { border-color: var(--danger); background: #fef2f2; }
+    .q-itme .socio-person.checked .socio-checkbox { background: var(--danger); border-color: var(--danger); }
+    .q-itme .socio-limit-badge { background: #fef2f2; color: var(--danger); }
+
+    /* ── PULSE SCALE ── */
+    .pulse-scale-wrap {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--surface2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .pulse-q-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .pulse-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .pulse-options {
+      display: flex;
+      gap: 6px;
+    }
+    .pulse-option {
+      flex: 1;
+      aspect-ratio: 1;
+      max-height: 48px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pulse-option:hover { border-color: #7c3aed; background: #faf5ff; }
+    .pulse-option.selected { border-color: #7c3aed; background: #7c3aed; color: white; }
+
+    /* ── KLİNİK ÖLÇEK (BDI/CDI) ── */
+    .scale-item-wrap {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--surface2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .scale-item-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .scale-item-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .scale-item-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .scale-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .15s;
+      background: white;
+    }
+    .scale-option:hover { border-color: #059669; background: var(--ok-soft); }
+    .scale-option.selected { border-color: #059669; background: var(--ok-soft); }
+    .scale-option-radio {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .scale-option.selected .scale-option-radio {
+      border-color: #059669;
+      background: #059669;
+    }
+    .scale-option.selected .scale-option-radio::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: white;
+    }
+    .scale-option-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+    /* ── ENNEAGRAM ── */
+    .ennea-q-wrap {
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--surface2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .ennea-q-num { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+    .ennea-q-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
+    .ennea-scale {
+      display: flex;
+      gap: 6px;
+    }
+    .ennea-option {
+      flex: 1;
+      padding: 10px 4px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      background: white;
+    }
+    .ennea-option:hover { border-color: #7c3aed; }
+    .ennea-option.selected { border-color: #7c3aed; background: #7c3aed; color: white; }
+    .ennea-option-num { font-size: 16px; font-weight: 800; display: block; }
+    .ennea-option-label { font-size: 9px; color: var(--muted); display: block; margin-top: 2px; }
+    .ennea-option.selected .ennea-option-label { color: rgba(255,255,255,.7); }
+    .ennea-scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── KOD GİRİŞİ ── */
+    .code-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: .15em;
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+      font-family: monospace;
+    }
+    .code-input:focus { border-color: var(--brand); background: white; }
+
+    /* ── BUTONLAR ── */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--brand);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .btn-back {
+      background: none;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin: 0 16px 16px;
+    }
+    .btn-row .btn-primary { flex: 1; }
+
+    /* ── DURUM EKRANLARI ── */
+    .state-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .state-icon { font-size: 64px; margin-bottom: 20px; }
+    .state-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .state-desc { font-size: 15px; color: var(--muted); line-height: 1.6; max-width: 320px; }
+
+    /* ── UYARI ── */
+    .info-box {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .info-box-text { font-size: 12px; color: #92400e; line-height: 1.5; }
+
+    /* ── ÖZET ── */
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label { color: var(--muted); font-weight: 600; }
+    .summary-val { font-weight: 700; color: var(--text); text-align: right; max-width: 60%; }
+
+    /* ── LOADING ── */
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FADE-IN ── */
+    .fade-in { animation: fadeIn .25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* ── AÇIK AD-SOYAD GİRİŞİ ── */
+    .open-name-input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 16px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .open-name-input:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+
+    /* ── MEB BİLGİ FORMU ── */
+    .info-fields { display: flex; flex-direction: column; gap: 14px; }
+    .info-field { display: flex; flex-direction: column; gap: 6px; }
+    .info-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .info-input, .info-textarea, .info-select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .info-input:focus, .info-textarea:focus, .info-select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+    .info-textarea { min-height: 64px; resize: vertical; line-height: 1.5; }
+    .info-select { cursor: pointer; }
+    .info-radio-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .info-radio-opt {
+      flex: 1 1 auto;
+      min-width: 80px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .info-radio-opt:hover { border-color: var(--brand); }
+    .info-radio-opt.selected {
+      background: var(--brand-soft);
+      border-color: var(--brand);
+      color: var(--brand);
+      font-weight: 700;
+    }
+    .info-check-col { display: flex; flex-direction: column; gap: 6px; }
+    .info-check-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .info-check-opt:hover { border-color: var(--brand); }
+    .info-check-opt.selected {
+      background: var(--brand-soft);
+      border-color: var(--brand);
+      color: var(--brand);
+      font-weight: 600;
+    }
+    .info-check-opt input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--brand);
+      cursor: pointer;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (min-width: 600px) {
+      body { background: #e2e8f0; }
+      .form-wrap { max-width: 520px; margin: 0 auto; background: #f1f5f9; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+<div class="form-wrap" id="app">
+  <!-- JS ile doldurulacak -->
+  <div class="state-screen">
+    <div class="state-icon">⏳</div>
+    <div class="state-title">Yükleniyor…</div>
+    <div class="state-desc">Anket bilgileri getiriliyor.</div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, addDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnJp6gKHLnpQluBN6lSQId2ZHnjnr1HAk",
+    authDomain: "ekip-pusulasi.firebaseapp.com",
+    projectId: "ekip-pusulasi",
+    storageBucket: "ekip-pusulasi.firebasestorage.app",
+    messagingSenderId: "298048493291",
+    appId: "1:298048493291:web:e7c7610e70aa49c60e10ae"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // URL params — sadece sessionId, token yok
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('s');
+
+  // ── GLOBAL STATE ──
+  let session = null;       // Firestore'dan gelen session verisi
+  let step = 0;             // Mevcut adım
+  let identityMethod = 'list'; // 'list' | 'code'
+  let selectedParticipantId = null;
+  let selectedParticipantName = null;
+  let answers = {};         // { questionId: value / [values] }
+  let enneaAnswers = [];    // 54 değer
+  let infoFormData = {};    // { sectionId: { fieldKey: value } }
+
+  const STEPS = [];         // Dinamik olarak doldurulacak
+
+  // ── YARDIMCI ──
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function initials(name) {
+    return (name||'?').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+  }
+
+  // ── ADIM YAPISI ──
+  function buildSteps() {
+    STEPS.length = 0;
+    STEPS.push({ id: 'identity', label: 'Kimlik' });
+
+    // Sosyometrik sorular
+    const socioQs = (session.questions || []).filter(q =>
+      ['seçim','itme','algılanan-seçim','algılanan-itme'].includes(q.category)
+    );
+    socioQs.forEach(q => STEPS.push({ id: 'socio_' + q.id, label: 'Soru', qid: q.id }));
+
+    // Pulse soruları (hepsi tek adım)
+    const pulseQs = (session.questions || []).filter(q =>
+      ['pulse-scale','pulse-yesno'].includes(q.category)
+    );
+    if (pulseQs.length) STEPS.push({ id: 'pulse', label: 'Pulse' });
+
+    // Klinik ölçekler — scaleId'e göre grupla
+    const scaleQs = (session.questions || []).filter(q => q.category === 'scale-item');
+    const scaleGroups = {};
+    scaleQs.forEach(q => {
+      const gk = q.scaleId || 'scale';
+      if (!scaleGroups[gk]) scaleGroups[gk] = [];
+      scaleGroups[gk].push(q);
+    });
+    Object.keys(scaleGroups).forEach(sid => {
+      // scaleItemIndex'e göre sırala
+      scaleGroups[sid].sort((a, b) => (a.scaleItemIndex||0) - (b.scaleItemIndex||0));
+      STEPS.push({ id: 'scale_' + sid, label: 'Sorular', scaleId: sid, questions: scaleGroups[sid] });
+    });
+
+    // Enneagram
+    const hasEnnea = (session.questions || []).some(q => q.category === 'ennea-item');
+    if (hasEnnea) {
+      // 54 soruyu 6 adıma böl (9'ar soru)
+      for (let chunk = 0; chunk < 6; chunk++) {
+        STEPS.push({ id: 'ennea_' + chunk, label: 'Kişilik', chunk });
+      }
+    }
+
+    // MEB Öğrenci Bilgi Formu bölümleri (aktifse)
+    if (session.infoFormEnabled && Array.isArray(session.infoFormSections)) {
+      session.infoFormSections.forEach(sec => {
+        STEPS.push({ id: 'info_' + sec.id, label: sec.label, infoSection: sec });
+      });
+    }
+
+    STEPS.push({ id: 'summary', label: 'Özet' });
+  }
+
+  // ── RENDER ──
+  function render() {
+    const app = document.getElementById('app');
+    app.className = 'form-wrap fade-in';
+
+    if (!session) { renderError('Oturum bulunamadı'); return; }
+
+    const currentStep = STEPS[step];
+    if (!currentStep) { renderError('Geçersiz adım'); return; }
+
+    const progressHtml = renderProgress();
+
+    if (currentStep.id === 'identity') {
+      app.innerHTML = progressHtml + renderIdentityStep();
+    } else if (currentStep.id.startsWith('socio_')) {
+      const q = (session.questions || []).find(x => x.id === currentStep.qid);
+      app.innerHTML = progressHtml + renderSocioStep(q);
+    } else if (currentStep.id === 'pulse') {
+      const pulseQs = (session.questions || []).filter(q => ['pulse-scale','pulse-yesno'].includes(q.category));
+      app.innerHTML = progressHtml + renderPulseStep(pulseQs);
+    } else if (currentStep.id.startsWith('scale_')) {
+      app.innerHTML = progressHtml + renderScaleStep(currentStep);
+    } else if (currentStep.id.startsWith('ennea_')) {
+      app.innerHTML = progressHtml + renderEnneaStep(currentStep.chunk);
+    } else if (currentStep.id.startsWith('info_')) {
+      app.innerHTML = progressHtml + renderInfoFormStep(currentStep.infoSection);
+    } else if (currentStep.id === 'summary') {
+      app.innerHTML = progressHtml + renderSummaryStep();
+    }
+
+    bindStep(currentStep);
+  }
+
+  function renderProgress() {
+    const pct = Math.round((step / (STEPS.length - 1)) * 100);
+    const labels = ['Kimlik','Sorular','Pulse','Ölçekler','Kişilik','Özet'];
+    const currentLabel = STEPS[step]?.label || '';
+    return `
+      <div class="form-header">
+        <div class="header-brand">
+          <div class="header-logo">🧭</div>
+          <div class="header-brand-name">EKİP PUSULASI</div>
+        </div>
+        <div class="header-institution">${esc(session.institutionName || session.projectName || '')}</div>
+        <div class="header-desc">${esc(session.projectName || '')} · Katılımcı Formu</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-steps">
+          ${STEPS.map((s, i) => `<div class="progress-step ${i < step ? 'done' : i === step ? 'active' : ''}"></div>`).join('')}
+        </div>
+        <div class="progress-label">${step + 1} / ${STEPS.length} — ${esc(currentLabel)}</div>
+      </div>`;
+  }
+
+  // ── KİMLİK ADIMI ──
+  function renderIdentityStep() {
+    const useCode = session.identityMethod === 'code' || session.identityMethod === 'both';
+    const useList = session.identityMethod === 'list' || session.identityMethod === 'both' || !session.identityMethod;
+    const useOpen = session.identityMethod === 'open';
+    const showTabs = session.identityMethod === 'both';
+
+    let tabsHtml = '';
+    if (showTabs) {
+      tabsHtml = `
+        <div class="identity-method-tabs">
+          <button class="identity-tab ${identityMethod === 'list' ? 'active' : ''}" onclick="setIdentityMethod('list')">📋 Listeden Seç</button>
+          <button class="identity-tab ${identityMethod === 'code' ? 'active' : ''}" onclick="setIdentityMethod('code')">🔑 Kod Gir</button>
+        </div>`;
+    }
+
+    let contentHtml = '';
+
+    if ((useList && !showTabs) || (showTabs && identityMethod === 'list')) {
+      const participants = session.participants || [];
+      const items = participants.map(p => `
+        <div class="person-item ${selectedParticipantId === p.id ? 'selected' : ''}"
+             onclick="selectPerson('${p.id}', '${esc(p.name)}')"
+             data-pid="${p.id}">
+          <div class="person-avatar">${initials(p.name)}</div>
+          <div style="flex:1;">
+            <div class="person-name">${esc(p.name)}</div>
+            ${p.group ? `<div class="person-group">${esc(p.group)}</div>` : ''}
+          </div>
+          <div class="person-check"></div>
+        </div>`).join('');
+
+      contentHtml = `
+        <input type="text" class="person-search" placeholder="🔍 İsim ara…"
+               oninput="filterPersons(this.value)"
+               id="person-search">
+        <div class="person-list" id="person-list">${items}</div>`;
+    }
+
+    if ((useCode && !showTabs) || (showTabs && identityMethod === 'code')) {
+      contentHtml = `
+        <p style="font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.5;">
+          Size verilen katılımcı kodunu girin.
+        </p>
+        <input type="text" class="code-input" id="code-input"
+               placeholder="ABC123"
+               maxlength="10"
+               value="${esc(selectedParticipantId && identityMethod === 'code' ? selectedParticipantName : '')}"
+               oninput="this.value = this.value.toUpperCase()">
+        ${selectedParticipantId && identityMethod === 'code' ? `<div style="margin-top:10px;padding:10px 14px;background:var(--ok-soft);border-radius:10px;font-size:13px;color:var(--ok);font-weight:700;">✓ ${esc(selectedParticipantName)} seçildi</div>` : ''}`;
+    }
+
+    if (useOpen) {
+      // Mevcut seçilmiş ismi input'ta göster
+      const savedName = selectedParticipantName || '';
+      const savedGroup = (selectedParticipantId || '').startsWith('open_') ? (sessionStorage.getItem('open_group_' + sessionId) || '') : '';
+      contentHtml = `
+        <p style="font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.5;">
+          Ad ve soyadını yaz. Varsa sınıf bilgisini de gir.
+        </p>
+        <div class="field" style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;">Ad Soyad</label>
+          <input type="text" class="open-name-input" id="open-name"
+                 placeholder="Örn: Ayşe Yılmaz"
+                 value="${esc(savedName)}"
+                 autocomplete="name">
+        </div>
+        <div class="field">
+          <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;">Sınıf / Grup (isteğe bağlı)</label>
+          <input type="text" class="open-name-input" id="open-group"
+                 placeholder="Örn: 7-A"
+                 value="${esc(savedGroup)}">
+        </div>
+        ${selectedParticipantId && selectedParticipantName ? `<div style="margin-top:10px;padding:10px 14px;background:var(--ok-soft);border-radius:10px;font-size:13px;color:var(--ok);font-weight:700;">✓ ${esc(selectedParticipantName)} olarak devam ediliyor</div>` : ''}`;
+    }
+
+    return `
+      <div class="card">
+        <div class="section-title">Adım 1 — Kimliğinizi Doğrulayın</div>
+        ${session.description ? `<div style="background:var(--surface2);border-left:3px solid var(--brand);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:14px;color:var(--text);line-height:1.6;">${esc(session.description)}</div>` : ''}
+        <div class="question-title">Siz kimsiniz?</div>
+        <div class="question-desc">${useOpen ? 'Ad-soyadınızı aşağıya yazın.' : 'Aşağıdan kendi adınızı seçin.'} Yanıtlarınız gizli tutulacaktır.</div>
+        ${tabsHtml}
+        ${contentHtml}
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-next" onclick="nextStep()" ${selectedParticipantId ? '' : 'disabled'}>
+          Devam Et →
+        </button>
+      </div>`;
+  }
+
+  // ── SOSYOMETRİ ADIMI ──
+  function renderSocioStep(q) {
+    if (!q) return '<div class="card">Soru bulunamadı.</div>';
+    const isItme = q.category === 'itme' || q.category === 'algılanan-itme';
+    const isOrdered = !!q.orderedSelection;
+    const max = q.max || 3;
+    const selected = answers[q.id] || [];
+    const count = selected.length;
+    const participants = (session.participants || []).filter(p => p.id !== selectedParticipantId);
+
+    const catIcon = { 'seçim': '💚', 'itme': '🚫', 'algılanan-seçim': '🤔', 'algılanan-itme': '🤔' };
+    const catColor = isItme ? 'var(--danger)' : 'var(--brand)';
+
+    const items = participants.map(p => {
+      const selIdx = selected.indexOf(p.id);
+      const isChecked = selIdx >= 0;
+      const isDisabled = !isChecked && count >= max;
+      const rankBadge = isOrdered && isChecked
+        ? `<span style="background:${catColor};color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">${selIdx + 1}</span>`
+        : '';
+      return `
+        <div class="socio-person ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} ${isItme ? 'q-itme' : ''}"
+             onclick="toggleSocio('${q.id}', '${p.id}', ${max})"
+             data-pid="${p.id}">
+          <div class="person-avatar" style="font-size:13px;background:${isChecked ? catColor : ''};color:${isChecked ? 'white' : ''}">
+            ${initials(p.name)}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">${esc(p.name)}</div>
+            ${p.group ? `<div style="font-size:12px;color:var(--muted);">${esc(p.group)}</div>` : ''}
+          </div>
+          ${rankBadge}
+          <div class="socio-checkbox">${isChecked && !isOrdered ? '✓' : ''}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="card ${isItme ? 'q-itme' : ''}">
+        <div class="section-title">${catIcon[q.category] || '❓'} ${q.category.toUpperCase().replace('-', ' ')}</div>
+        <div class="question-title">${esc(q.title)}</div>
+        ${q.description ? `<div class="question-desc">${esc(q.description)}</div>` : ''}
+        ${isOrdered ? `<div style="font-size:12px;color:var(--brand);background:var(--brand-soft);padding:6px 12px;border-radius:8px;margin-bottom:10px;">📋 Seçim sırası önemlidir. İlk seçtiğiniz kişi 1. tercihiniz olarak kaydedilir.</div>` : ''}
+        <div class="socio-limit-badge">
+          <span class="socio-counter" id="socio-count-${q.id}">${count}</span>
+          <span>/ ${max} kişi seçildi</span>
+        </div>
+        <div id="socio-list-${q.id}">${items}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Geri</button>
+        <button class="btn-primary" onclick="nextStep()">Devam Et →</button>
+      </div>`;
+  }
+
+  // ── PULSE ADIMI ──
+  function renderPulseStep(pulseQs) {
+    const PULSE_LABELS = { 1: 'Hiç katılmıyorum', 3: 'Orta', 5: 'Tamamen katılıyorum' };
+    const items = pulseQs.map(q => {
+      const max = q.pulseMax || 5;
+      const sel = answers[q.id];
+      const opts = Array.from({ length: max }, (_, i) => i + 1).map(v => `
+        <button class="pulse-option ${sel === v ? 'selected' : ''}"
+                onclick="setPulse('${q.id}', ${v})">${v}</button>`).join('');
+      return `
+        <div class="pulse-scale-wrap">
+          <div class="pulse-q-title">${esc(q.title)}</div>
+          <div class="pulse-labels">
+            <span>Hiç katılmıyorum</span>
+            <span>Tamamen katılıyorum</span>
+          </div>
+          <div class="pulse-options">${opts}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="card">
+        <div class="section-title">💜 PULSE SORULARI</div>
+        <div class="question-desc">Her ifadeye katılma derecenizi belirtin. ${pulseQs.length} soru.</div>
+        ${items}
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Geri</button>
+        <button class="btn-primary" onclick="nextStep()">Devam Et →</button>
+      </div>`;
+  }
+
+  // ── ÖLÇEK ADIMI (BDI/CDI) ──
+  function renderScaleStep(stepData) {
+    const questions = stepData.questions || [];
+    const answered = questions.filter(q => answers[q.id] !== undefined).length;
+
+    const items = questions.map((q, idx) => {
+      const opts = (q.scaleOptions || []).map((optText, vi) => {
+        const isSelected = answers[q.id] === vi;
+        return `
+          <div class="scale-option ${isSelected ? 'selected' : ''}"
+               onclick="setScale('${q.id}', ${vi})">
+            <div class="scale-option-radio"></div>
+            <div class="scale-option-text">${esc(optText)}</div>
+          </div>`;
+      }).join('');
+      return `
+        <div class="scale-item-wrap">
+          <div class="scale-item-num">Soru ${idx + 1} / ${questions.length}</div>
+          <div class="scale-item-options">${opts}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">${answered} / ${questions.length} yanıtlandı</div>
+        ${items}
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Geri</button>
+        <button class="btn-primary" onclick="nextStep()">Devam Et →</button>
+      </div>`;
+  }
+
+  // ── ENNEAGRAM ADIMI ──
+  function renderEnneaStep(chunk) {
+    const start = chunk * 9;
+    const end = start + 9;
+    const ENNEA_QS = getEnneagramQuestions();
+    const chunkQs = ENNEA_QS.slice(start, end);
+    const totalAnswered = enneaAnswers.filter(v => v !== null && v !== undefined).length;
+    const totalQ = ENNEA_QS.length;
+
+    const items = chunkQs.map((q, i) => {
+      const qi = start + i;
+      const sel = enneaAnswers[qi];
+      const opts = [1,2,3,4,5].map(v => `
+        <button class="ennea-option ${sel === v ? 'selected' : ''}"
+                onclick="setEnnea(${qi}, ${v})">
+          <span class="ennea-option-num">${v}</span>
+        </button>`).join('');
+      return `
+        <div class="ennea-q-wrap">
+          <div class="ennea-q-num">Soru ${qi + 1} / ${totalQ}</div>
+          <div class="ennea-q-text">${esc(q.q)}</div>
+          <div class="ennea-scale">${opts}</div>
+          <div class="ennea-scale-labels">
+            <span>1 = Hiç beni yansıtmıyor</span>
+            <span>5 = Tamamen beni yansıtıyor</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="card">
+        <div class="section-title">🧠 KİŞİLİK ANKETİ — BÖLÜM ${chunk + 1}/6</div>
+        <div class="question-desc">Her ifadeyi kendinizi ne kadar yansıttığına göre 1-5 arasında değerlendirin. İçgüdüsel olarak yanıtlayın.</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Toplam: ${totalAnswered} / ${totalQ} yanıtlandı</div>
+        ${items}
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Geri</button>
+        <button class="btn-primary" onclick="nextStep()">Devam Et →</button>
+      </div>`;
+  }
+
+  // ── MEB BİLGİ FORMU ADIMI ─────────────────────────────────────
+  function renderInfoFormStep(section) {
+    if (!section) return '<div class="state-screen"><div class="state-icon">⚠️</div><div class="state-title">Bölüm bulunamadı</div></div>';
+    const sectionData = infoFormData[section.id] || {};
+
+    // Bir alanın, bağımlı olduğu koşula uyup uymadığını kontrol et
+    function isFieldVisible(field) {
+      if (!field.dependsOn) return true;
+      const depField = section.fields.find(f => f.key === field.dependsOn.q);
+      if (!depField) return true;
+      const depVal = sectionData[field.dependsOn.q];
+      return depVal === field.dependsOn.val;
+    }
+
+    const fieldsHtml = section.fields.map(field => {
+      if (!isFieldVisible(field)) return '';
+      const val = sectionData[field.key] ?? '';
+
+      // Input tipine göre render
+      let inputHtml = '';
+      if (field.type === 'text' || field.type === 'tel' || field.type === 'date' || field.type === 'number') {
+        const attrs = field.type === 'number' ? `min="${field.min ?? 0}" max="${field.max ?? 99}"` : '';
+        inputHtml = `<input class="info-input" type="${field.type}" data-field="${field.key}" value="${esc(val)}" placeholder="${esc(field.placeholder || '')}" ${attrs}>`;
+      } else if (field.type === 'textarea') {
+        inputHtml = `<textarea class="info-textarea" data-field="${field.key}" placeholder="${esc(field.placeholder || '')}">${esc(val)}</textarea>`;
+      } else if (field.type === 'select') {
+        inputHtml = `<select class="info-select" data-field="${field.key}">
+          <option value="">— Seç —</option>
+          ${(field.options || []).map(opt => `<option value="${esc(opt)}" ${val === opt ? 'selected' : ''}>${esc(opt)}</option>`).join('')}
+        </select>`;
+      } else if (field.type === 'radio') {
+        inputHtml = `<div class="info-radio-row">
+          ${(field.options || []).map(opt => `
+            <label class="info-radio-opt ${val === opt ? 'selected' : ''}">
+              <input type="radio" name="info-${section.id}-${field.key}" value="${esc(opt)}" data-field="${field.key}" ${val === opt ? 'checked' : ''} style="display:none;">
+              <span>${esc(opt)}</span>
+            </label>
+          `).join('')}
+        </div>`;
+      } else if (field.type === 'checkbox' || field.type === 'multi-select') {
+        const selectedArr = Array.isArray(val) ? val : [];
+        inputHtml = `<div class="info-check-col">
+          ${(field.options || []).map(opt => `
+            <label class="info-check-opt ${selectedArr.includes(opt) ? 'selected' : ''}">
+              <input type="checkbox" value="${esc(opt)}" data-field="${field.key}" ${selectedArr.includes(opt) ? 'checked' : ''}>
+              <span>${esc(opt)}</span>
+            </label>
+          `).join('')}
+        </div>`;
+      } else if (field.type === 'yesno') {
+        inputHtml = `<div class="info-radio-row">
+          ${['evet','hayır'].map(opt => `
+            <label class="info-radio-opt ${val === opt ? 'selected' : ''}">
+              <input type="radio" name="info-${section.id}-${field.key}" value="${opt}" data-field="${field.key}" ${val === opt ? 'checked' : ''} style="display:none;">
+              <span>${opt === 'evet' ? 'Evet' : 'Hayır'}</span>
+            </label>
+          `).join('')}
+        </div>`;
+      }
+
+      return `
+        <div class="info-field">
+          <label class="info-label">${esc(field.label)}</label>
+          ${inputHtml}
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="question-section">
+        <div class="section-header" style="gap:10px;">
+          <span class="section-icon" style="font-size:28px;">${section.icon || '📋'}</span>
+          <div>
+            <div class="section-title">${esc(section.label)}</div>
+            ${section.description ? `<div class="section-hint" style="margin-top:2px;">${esc(section.description)}</div>` : ''}
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;background:var(--surface2);border-radius:8px;padding:8px 12px;">
+          💡 Tüm alanlar isteğe bağlıdır. Bilmediğin veya paylaşmak istemediğin yerleri boş bırakabilirsin.
+        </div>
+        <div class="info-fields">
+          ${fieldsHtml}
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Geri</button>
+        <button class="btn-primary" onclick="nextStep()">Devam Et →</button>
+      </div>`;
+  }
+  function renderSummaryStep() {
+    const socioQs = (session.questions || []).filter(q => ['seçim','itme','algılanan-seçim','algılanan-itme'].includes(q.category));
+    const pulseQs = (session.questions || []).filter(q => ['pulse-scale','pulse-yesno'].includes(q.category));
+    const scaleQs = (session.questions || []).filter(q => q.category === 'scale-item');
+    const hasEnnea = (session.questions || []).some(q => q.category === 'ennea-item');
+
+    const answeredPulse = pulseQs.filter(q => answers[q.id] !== undefined).length;
+    const answeredScale = scaleQs.filter(q => answers[q.id] !== undefined).length;
+    const answeredEnnea = enneaAnswers.filter(v => v !== null && v !== undefined).length;
+
+    const rows = [
+      { label: 'Katılımcı', val: selectedParticipantName },
+      ...socioQs.map(q => ({
+        label: q.title.length > 30 ? q.title.substring(0,30)+'…' : q.title,
+        val: `${(answers[q.id]||[]).length} kişi seçildi`
+      })),
+      ...(pulseQs.length ? [{ label: 'Pulse Soruları', val: `${answeredPulse}/${pulseQs.length} yanıtlandı` }] : []),
+      ...(scaleQs.length ? [{ label: 'Klinik Ölçek', val: `${answeredScale}/${scaleQs.length} yanıtlandı` }] : []),
+      ...(hasEnnea ? [{ label: 'Kişilik Anketi', val: `${answeredEnnea}/54 yanıtlandı` }] : []),
+      ...(session.infoFormEnabled && Array.isArray(session.infoFormSections) ? (() => {
+        const totalFields = session.infoFormSections.reduce((sum, s) => sum + s.fields.length, 0);
+        const filledFields = session.infoFormSections.reduce((sum, s) => {
+          const sec = infoFormData[s.id] || {};
+          return sum + s.fields.filter(f => {
+            const v = sec[f.key];
+            return v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0);
+          }).length;
+        }, 0);
+        return [{ label: '📋 Bilgi Formu', val: `${filledFields}/${totalFields} alan dolduruldu` }];
+      })() : []),
+    ];
+
+    return `
+      <div class="card">
+        <div class="section-title">✅ ÖZET VE ONAY</div>
+        <div class="question-title">Yanıtlarınızı Gönderin</div>
+        <div class="question-desc" style="margin-bottom:16px;">Göndermeden önce kontrol edin. Gönderildikten sonra değişiklik yapılamaz.</div>
+        ${rows.map(r => `
+          <div class="summary-row">
+            <div class="summary-label">${esc(r.label)}</div>
+            <div class="summary-val">${esc(r.val)}</div>
+          </div>`).join('')}
+      </div>
+      <div class="card" style="background:#ecfdf5;border:1px solid #6ee7b7;">
+        <div style="font-size:13px;color:#065f46;line-height:1.6;">
+          🔒 Yanıtlarınız güvenle kaydedilecektir.
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Geri</button>
+        <button class="btn-primary" id="btn-submit" onclick="submitForm()">
+          Gönder ✓
+        </button>
+      </div>`;
+  }
+
+  // ── HATA EKRANLARI ──
+  function renderError(msg) {
+    document.getElementById('app').innerHTML = `
+      <div class="state-screen">
+        <div class="state-icon">⚠️</div>
+        <div class="state-title">Bir sorun oluştu</div>
+        <div class="state-desc">${esc(msg)}</div>
+      </div>`;
+  }
+
+  function renderAlreadySubmitted() {
+    document.getElementById('app').innerHTML = `
+      <div class="form-header">
+        <div class="header-brand"><div class="header-logo">🧭</div><div class="header-brand-name">EKİP PUSULASI</div></div>
+        <div class="header-institution">${esc(session?.institutionName || '')}</div>
+      </div>
+      <div class="state-screen">
+        <div class="state-icon">🔒</div>
+        <div class="state-title">Zaten Gönderildi</div>
+        <div class="state-desc">Bu link daha önce kullanılmış. Her katılımcı anketi yalnızca bir kez doldurabilir.</div>
+      </div>`;
+  }
+
+  function renderSuccess() {
+    document.getElementById('app').innerHTML = `
+      <div class="form-header">
+        <div class="header-brand"><div class="header-logo">🧭</div><div class="header-brand-name">EKİP PUSULASI</div></div>
+        <div class="header-institution">${esc(session?.institutionName || '')}</div>
+      </div>
+      <div class="state-screen">
+        <div class="state-icon">🎉</div>
+        <div class="state-title">Yanıtlarınız Alındı!</div>
+        <div class="state-desc">
+          Katılımınız için teşekkürler.<br><br>
+          <strong>${esc(session?.institutionName || '')}</strong> adına teşekkür ederiz.
+          Yanıtlarınız güvenle kaydedildi.
+        </div>
+      </div>`;
+  }
+
+  // ── GEÇİŞLER ──
+  window.nextStep = function() {
+    if (step < STEPS.length - 1) {
+      step++;
+      render();
+      window.scrollTo(0, 0);
+    }
+  };
+
+  window.prevStep = function() {
+    if (step > 0) {
+      step--;
+      render();
+      window.scrollTo(0, 0);
+    }
+  };
+
+  window.setIdentityMethod = function(method) {
+    identityMethod = method;
+    selectedParticipantId = null;
+    selectedParticipantName = null;
+    render();
+  };
+
+  window.selectPerson = function(pid, name) {
+    selectedParticipantId = pid;
+    selectedParticipantName = name;
+    // Buton etkinleştir
+    const btn = document.getElementById('btn-next');
+    if (btn) btn.disabled = false;
+    // Görsel güncelle
+    document.querySelectorAll('.person-item').forEach(el => {
+      el.classList.toggle('selected', el.dataset.pid === pid);
+    });
+  };
+
+  window.filterPersons = function(val) {
+    const v = val.toLowerCase();
+    document.querySelectorAll('.person-item').forEach(el => {
+      const name = el.querySelector('.person-name')?.textContent.toLowerCase() || '';
+      el.style.display = name.includes(v) ? '' : 'none';
+    });
+  };
+
+  window.toggleSocio = function(qid, pid, max) {
+    if (!answers[qid]) answers[qid] = [];
+    const idx = answers[qid].indexOf(pid);
+    if (idx >= 0) {
+      answers[qid].splice(idx, 1);
+    } else {
+      if (answers[qid].length >= max) return;
+      answers[qid].push(pid);
+    }
+    const count = answers[qid].length;
+    const counter = document.getElementById('socio-count-' + qid);
+    if (counter) counter.textContent = count;
+
+    const q = (session.questions||[]).find(x=>x.id===qid);
+    const isItme = q?.category === 'itme' || q?.category === 'algılanan-itme';
+    const isOrdered = !!q?.orderedSelection;
+    const catColor = isItme ? 'var(--danger)' : 'var(--brand)';
+
+    const list = document.getElementById('socio-list-' + qid);
+    if (list) {
+      list.querySelectorAll('.socio-person').forEach(el => {
+        const pid2 = el.dataset.pid;
+        const selIdx = answers[qid].indexOf(pid2);
+        const isChecked = selIdx >= 0;
+        const isDisabled = !isChecked && count >= max;
+        el.classList.toggle('checked', isChecked);
+        el.classList.toggle('disabled', isDisabled);
+
+        // Checkbox veya sıra numarası
+        const cb = el.querySelector('.socio-checkbox');
+        if (cb) {
+          if (isOrdered && isChecked) {
+            cb.textContent = '';
+            // Sıra rozeti: varsa güncelle, yoksa oluştur
+            let rankBadge = el.querySelector('.rank-badge');
+            if (!rankBadge) {
+              rankBadge = document.createElement('span');
+              rankBadge.className = 'rank-badge';
+              rankBadge.style.cssText = 'background:' + catColor + ';color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;';
+              el.insertBefore(rankBadge, cb);
+            }
+            rankBadge.textContent = selIdx + 1;
+            rankBadge.style.background = catColor;
+          } else {
+            cb.textContent = isChecked ? '✓' : '';
+            el.querySelector('.rank-badge')?.remove();
+          }
+        }
+
+        const av = el.querySelector('.person-avatar');
+        if (av) {
+          av.style.background = isChecked ? catColor : '';
+          av.style.color = isChecked ? 'white' : '';
+        }
+      });
+    }
+  };
+
+  window.setPulse = function(qid, val) {
+    answers[qid] = val;
+    // Görsel güncelle
+    document.querySelectorAll(`[onclick*="setPulse('${qid}'"]`).forEach(btn => {
+      btn.classList.toggle('selected', parseInt(btn.textContent) === val);
+    });
+  };
+
+  window.setScale = function(qid, val) {
+    answers[qid] = val;
+    render();
+  };
+
+  window.setEnnea = function(qi, val) {
+    enneaAnswers[qi] = val;
+    // Görsel güncelle — sadece ilgili satırı
+    const wrap = document.querySelector(`[onclick*="setEnnea(${qi},"]`)?.closest('.ennea-q-wrap');
+    if (wrap) {
+      wrap.querySelectorAll('.ennea-option').forEach((btn, i) => {
+        btn.classList.toggle('selected', i + 1 === val);
+      });
+    }
+    // Sayaç güncelle
+    const answered = enneaAnswers.filter(v => v !== null && v !== undefined).length;
+    const countEl = document.querySelector('.card .question-desc ~ div[style*="font-size:12px"]');
+    if (countEl) countEl.textContent = `Toplam: ${answered} / 54 yanıtlandı`;
+  };
+
+  // Kod ile kimlik doğrulama
+  window.lookupCode = async function() {
+    const code = document.getElementById('code-input')?.value.trim().toUpperCase();
+    if (!code) return;
+    const found = (session.participants || []).find(p =>
+      (p.code || '').toUpperCase() === code
+    );
+    if (found) {
+      selectedParticipantId = found.id;
+      selectedParticipantName = found.name;
+      identityMethod = 'code';
+      render();
+    } else {
+      alert('Kod bulunamadı. Lütfen kontrol edin.');
+    }
+  };
+
+  // ── FORM GÖNDERİMİ ──
+  window.submitForm = async function() {
+    const btn = document.getElementById('btn-submit');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>'; }
+
+    try {
+      // Aynı katılımcı daha önce bu session'da yanıt vermiş mi?
+      const { query: fbQuery, where: fbWhere, getDocs: fbGetDocs } = { query, where, getDocs };
+      const dupCheck = await fbGetDocs(fbQuery(
+        collection(db, 'survey_responses'),
+        fbWhere('sessionId', '==', sessionId),
+        fbWhere('participantId', '==', selectedParticipantId)
+      ));
+      if (!dupCheck.empty) {
+        renderAlreadySubmitted();
+        return;
+      }
+
+      const responseId = 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      const isOpenMode = session.identityMethod === 'open';
+      const openGroup = isOpenMode ? (sessionStorage.getItem('open_group_' + sessionId) || '') : '';
+
+      // Payload: undefined/null değerleri temizle, sadece tanımlı alanları gönder
+      const responseData = {
+        responseId: responseId,
+        sessionId: sessionId,
+        projectId: session.projectId || '',
+        participantId: selectedParticipantId || '',
+        participantName: selectedParticipantName || '',
+        answers: buildAnswersArray() || [],
+        submittedAt: new Date().toISOString(),
+      };
+      // Opsiyonel alanlar — varsa ekle
+      if (isOpenMode) {
+        responseData.openMode = true;
+        if (openGroup) responseData.openGroup = openGroup;
+      }
+      if (enneaAnswers && enneaAnswers.some(v => v !== null && v !== undefined)) {
+        // Null'ları 0 yap (Firestore null array'i kabul etse de null içinde fail edebilir)
+        responseData.enneaAnswers = enneaAnswers.map(v => (v === null || v === undefined) ? 0 : v);
+      }
+      if (session.infoFormEnabled && infoFormData && Object.keys(infoFormData).length) {
+        // infoFormData içindeki undefined/null'ları temizle
+        const cleanInfoForm = {};
+        for (const secId of Object.keys(infoFormData)) {
+          const sec = infoFormData[secId];
+          if (!sec || typeof sec !== 'object') continue;
+          const cleanSec = {};
+          for (const k of Object.keys(sec)) {
+            const v = sec[k];
+            if (v === undefined || v === null) continue;
+            if (Array.isArray(v) && v.length === 0) continue;
+            if (typeof v === 'string' && v.trim() === '') continue;
+            cleanSec[k] = v;
+          }
+          if (Object.keys(cleanSec).length) cleanInfoForm[secId] = cleanSec;
+        }
+        if (Object.keys(cleanInfoForm).length) responseData.infoFormData = cleanInfoForm;
+      }
+
+      await addDoc(collection(db, 'survey_responses'), responseData);
+      renderSuccess();
+    } catch(e) {
+      console.error('Submit error:', e);
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Gönder ✓'; }
+      alert('Gönderim sırasında hata oluştu: ' + e.message);
+    }
+  };
+
+  function buildAnswersArray() {
+    const result = [];
+    (session.questions || []).forEach(q => {
+      if (q.category === 'ennea-item') return; // ayrı alan
+      const val = answers[q.id];
+      result.push({
+        questionId: q.id,
+        category: q.category,
+        value: val !== undefined ? val : null,
+      });
+    });
+    return result;
+  }
+
+  function bindStep(currentStep) {
+    // Kod girişi için Enter tuşu
+    if (currentStep.id === 'identity') {
+      const codeInput = document.getElementById('code-input');
+      if (codeInput) {
+        codeInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter') window.lookupCode();
+        });
+        codeInput.addEventListener('input', () => {
+          const code = codeInput.value.trim().toUpperCase();
+          const found = (session.participants || []).find(p =>
+            (p.code || '').toUpperCase() === code
+          );
+          if (found) {
+            selectedParticipantId = found.id;
+            selectedParticipantName = found.name;
+            const btn = document.getElementById('btn-next');
+            if (btn) btn.disabled = false;
+          } else {
+            selectedParticipantId = null;
+            selectedParticipantName = null;
+            const btn = document.getElementById('btn-next');
+            if (btn) btn.disabled = true;
+          }
+        });
+      }
+
+      // Açık isim girişi (open)
+      const openName = document.getElementById('open-name');
+      const openGroup = document.getElementById('open-group');
+      if (openName) {
+        const updateOpenIdentity = () => {
+          const name = openName.value.trim();
+          const group = (openGroup?.value || '').trim();
+          const btn = document.getElementById('btn-next');
+          if (name.length >= 3) {
+            // Deterministik ID: isim + sessionId hash
+            const cleanName = name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-çğıöşüâî]/g, '');
+            selectedParticipantId = 'open_' + cleanName + '_' + sessionId.slice(-6);
+            selectedParticipantName = name;
+            // Grubu sessionStorage'a kaydet (submit'te kullanmak için)
+            if (group) sessionStorage.setItem('open_group_' + sessionId, group);
+            if (btn) btn.disabled = false;
+          } else {
+            selectedParticipantId = null;
+            selectedParticipantName = null;
+            if (btn) btn.disabled = true;
+          }
+        };
+        openName.addEventListener('input', updateOpenIdentity);
+        openGroup?.addEventListener('input', updateOpenIdentity);
+        updateOpenIdentity();
+      }
+    }
+
+    // MEB bilgi formu adımları
+    if (currentStep.id.startsWith('info_') && currentStep.infoSection) {
+      const section = currentStep.infoSection;
+      if (!infoFormData[section.id]) infoFormData[section.id] = {};
+      const sectionData = infoFormData[section.id];
+
+      // text / tel / date / number / textarea / select → change event
+      document.querySelectorAll('.info-input, .info-textarea, .info-select').forEach(el => {
+        el.addEventListener('input', e => {
+          const key = el.dataset.field;
+          if (!key) return;
+          sectionData[key] = el.value;
+        });
+        el.addEventListener('change', e => {
+          const key = el.dataset.field;
+          if (!key) return;
+          sectionData[key] = el.value;
+          // Koşullu alanları yeniden render etmek için: select değişirse re-render
+          if (el.classList.contains('info-select') && section.fields.some(f => f.dependsOn?.q === key)) {
+            render();
+          }
+        });
+      });
+
+      // radio (tek seçim) butonları — tüm info-radio-row'lar için
+      document.querySelectorAll('.info-radio-row').forEach(row => {
+        row.querySelectorAll('.info-radio-opt').forEach(opt => {
+          opt.addEventListener('click', () => {
+            const input = opt.querySelector('input[type="radio"]');
+            if (!input) return;
+            const key = input.dataset.field;
+            const val = input.value;
+            sectionData[key] = val;
+            // UI güncelle
+            row.querySelectorAll('.info-radio-opt').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            input.checked = true;
+            // Bağımlı alan varsa re-render
+            if (section.fields.some(f => f.dependsOn?.q === key)) {
+              render();
+            }
+          });
+        });
+      });
+
+      // checkbox / multi-select
+      document.querySelectorAll('.info-check-opt').forEach(opt => {
+        opt.addEventListener('click', e => {
+          // Label'ın kendisine tıklandığında native davranışı atla
+          if (e.target.tagName !== 'INPUT') e.preventDefault();
+          const input = opt.querySelector('input[type="checkbox"]');
+          if (!input) return;
+          input.checked = !input.checked;
+          const key = input.dataset.field;
+          const val = input.value;
+          let arr = Array.isArray(sectionData[key]) ? sectionData[key] : [];
+          if (input.checked) {
+            if (!arr.includes(val)) arr.push(val);
+            opt.classList.add('selected');
+          } else {
+            arr = arr.filter(x => x !== val);
+            opt.classList.remove('selected');
+          }
+          sectionData[key] = arr;
+        });
+      });
+    }
+  }
+
+  // ── ENNEAGRAM SORULARI ──
+  function getEnneagramQuestions() {
+    return [
+      { q: 'Yaptığım her şeyi nasıl daha iyi yapabileceğimi sürekli düşünürüm.' },
+      { q: 'Kendimi eleştiren bir yanım var.' },
+      { q: 'Kendi hayatının sorumluluğunu almayan insanlara kızarım.' },
+      { q: 'Sık sık başkalarının işini yeniden yapmak zorunda kalırım.' },
+      { q: 'Eşyalarımı düzenli ve tertipli tutarım.' },
+      { q: 'Mükemmeliyetçiyim.' },
+      { q: 'Ayrıntılara özen gösteririm.' },
+      { q: '"Hayır" demekte zorlanırım.' },
+      { q: 'Kabul edici ve esneğimdir.' },
+      { q: 'Bazen yaptığım her şeyin görmezden gelindiğini hissederim.' },
+      { q: 'İnsanlar sırlarını bana anlatmayı sever.' },
+      { q: 'Başkalarının hedeflerine ulaşmasına yardım etmekten büyük mutluluk duyarım.' },
+      { q: 'İnsanların benden rehberlik istemesinden hoşlanırım.' },
+      { q: 'Başkalarıyla ilişkilerim hayatımın özüdür.' },
+      { q: 'Çok çalışırım.' },
+      { q: 'Verimliliği ön planda tutarım.' },
+      { q: 'İşi her şeyin önüne koyarım.' },
+      { q: 'Yetersiz insanlardan nefret ederim.' },
+      { q: 'Para mutluluğum için önemlidir.' },
+      { q: 'Lider gerektiğinde öne çıkarım.' },
+      { q: 'Öne çıkmayı severim.' },
+      { q: 'Buruk tatlı hisleri gerçekten severim.' },
+      { q: 'Ağlarım.' },
+      { q: 'Haber hikayeleri beni duygulandırabilir.' },
+      { q: 'Düşüncelerimi ifade etmekte zorlanırım.' },
+      { q: 'Aşık olmayı hayal ederim.' },
+      { q: 'Doğada büyük bir hayranlık duyabilirim.' },
+      { q: 'Eşsiz bakış açım başkalarını neşelendirir.' },
+      { q: 'Hobilerle saatlerce yalnız zaman geçiririm.' },
+      { q: 'O kadar çok planlama yaparım ki yapmak için enerjim kalmaz.' },
+      { q: 'Her şeye karşı meraklıyım.' },
+      { q: 'Sürekli yeni deneyimler yaşamak zorundayım.' },
+      { q: 'Duygularımı göstermekte zorlanırım.' },
+      { q: 'Zamanımın büyük bölümünü şeyleri anlamaya çalışarak geçiririm.' },
+      { q: 'Hassas olduğumu saklamaya çalışırım.' },
+      { q: 'Sadığım.' },
+      { q: 'Aileyi her şeyin önünde tutarım.' },
+      { q: 'Çoğu insanın benim kadar sorumlu olmadığına kızarım.' },
+      { q: 'Karar vermeden önce başkalarından görüş alırım.' },
+      { q: 'Liderlerin kararlı olmasını tercih ederim.' },
+      { q: 'Dolu bir günle uyanmak güzel.' },
+      { q: 'Bir arkadaşı ele vermektense ağır bir ceza alırım.' },
+      { q: 'Gerginliği iyi bir şakayla kırmaya çalışırım.' },
+      { q: 'Herhangi bir konuda herkesle sohbet sürdürebilirim.' },
+      { q: 'İnsanların çöp saydığı şeylerin çoğunda bir kullanım alanı görürüm.' },
+      { q: 'Zihinsel zorlukları severim.' },
+      { q: 'Büyük olmamı beklerlerse bundan hoşlanmam.' },
+      { q: 'Dizginsizimdir.' },
+      { q: 'Seyahat etmeyi severim.' },
+      { q: 'Neyin doğru neyin yanlış olduğunu bilirim.' },
+      { q: 'Sömürülme korkusu beni güvenmekten alıkoyar.' },
+      { q: 'İnsanların bana gerçeği söylemesini isterim, gerçeği saklamalarını değil.' },
+      { q: 'Çabuk sinirlenebilirim.' },
+      { q: 'Başkalarına karşı şefkatliyim.' },
+    ];
+  }
+
+  // ── BAŞLANGIÇ: Session Yükle ──
+  async function init() {
+    if (!sessionId) {
+      renderError('Geçersiz link. Lütfen size gönderilen tam linki kullanın.');
+      return;
+    }
+
+    try {
+      const sessionSnap = await getDoc(doc(db, 'survey_sessions', sessionId));
+      if (!sessionSnap.exists()) {
+        renderError('Anket bulunamadı. Link geçersiz veya süresi dolmuş olabilir.');
+        return;
+      }
+
+      session = sessionSnap.data();
+
+      // Enneagram cevaplarını başlat
+      enneaAnswers = new Array(54).fill(null);
+
+      // Adımları oluştur
+      buildSteps();
+
+      // İlk render
+      render();
+
+    } catch(e) {
+      console.error('Init error:', e);
+      renderError('Bağlantı hatası: ' + e.message);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

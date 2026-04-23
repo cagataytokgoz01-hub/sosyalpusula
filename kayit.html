@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Rehber Atlası — Kayıt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand: #2563eb;
+      --brand-dark: #1d4ed8;
+      --brand-soft: #eff6ff;
+      --ok: #059669;
+      --ok-soft: #ecfdf5;
+      --danger: #dc2626;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #7c3aed 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .logo-text { font-size: 20px; font-weight: 800; color: var(--text); }
+    .logo-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+
+    .tabs {
+      display: flex;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      background: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .tab.active { background: white; color: var(--brand); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus { border-color: var(--brand); background: white; }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 8px;
+    }
+    .btn-primary { background: var(--brand); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .demo-box {
+      background: var(--brand-soft);
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .demo-box-title { font-size: 13px; font-weight: 800; color: var(--brand); margin-bottom: 6px; }
+    .demo-box ul { list-style: none; }
+    .demo-box li { font-size: 12px; color: #1e40af; padding: 2px 0; }
+    .demo-box li::before { content: '✓ '; font-weight: 700; }
+
+    .msg { text-align: center; font-size: 13px; margin-top: 12px; min-height: 18px; }
+    .msg.error { color: var(--danger); }
+    .msg.success { color: var(--ok); }
+
+    .divider { text-align: center; font-size: 12px; color: var(--muted); margin: 16px 0; }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      text-decoration: underline;
+    }
+
+    .success-screen {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    .success-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .success-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .plans {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .plan-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .plan-card:hover { border-color: var(--brand); }
+    .plan-card.highlighted { border-color: var(--brand); background: var(--brand-soft); }
+    .plan-name { font-size: 13px; font-weight: 800; color: var(--text); }
+    .plan-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .plan-badge { font-size: 10px; font-weight: 700; color: var(--brand); background: #dbeafe; padding: 1px 6px; border-radius: 99px; display: inline-block; margin-top: 4px; }
+  </style>
+</head>
+<body>
+<div class="card" id="app">
+  <!-- JS ile doldurulur -->
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnJp6gKHLnpQluBN6lSQId2ZHnjnr1HAk",
+    authDomain: "ekip-pusulasi.firebaseapp.com",
+    projectId: "ekip-pusulasi",
+    storageBucket: "ekip-pusulasi.firebasestorage.app",
+    messagingSenderId: "298048493291",
+    appId: "1:298048493291:web:e7c7610e70aa49c60e10ae"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Demo paket tanımı
+  const DEMO_PACKAGE = {
+    measurementsLeft: 1,
+    aiLeft: 5,
+    plan: 'demo',
+    role: 'user',
+  };
+
+  let mode = 'register'; // 'register' | 'login'
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function render() {
+    const el = document.getElementById('app');
+    if (mode === 'register') {
+      el.innerHTML = `
+        <div class="logo">
+          <div class="logo-icon">🧭</div>
+          <div><div class="logo-text">Rehber Atlası</div><div class="logo-sub">from Çağatay TOKGÖZ</div></div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="setMode('register')">Kayıt Ol</button>
+          <button class="tab" onclick="setMode('login')">Giriş Yap</button>
+        </div>
+
+        <div class="demo-box">
+          <div class="demo-box-title">🎁 Ücretsiz Demo Paketi</div>
+          <ul>
+            <li>1 ölçüm hakkı (1 proje analizi)</li>
+            <li>5 AI öneri hakkı</li>
+            <li>Tüm özellikler açık</li>
+          </ul>
+        </div>
+
+        <div class="field">
+          <label>Ad Soyad</label>
+          <input type="text" id="reg-name" placeholder="Ahmet Yılmaz" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Kurum Adı (opsiyonel)</label>
+          <input type="text" id="reg-org" placeholder="Örn: İstanbul İlkokulu">
+        </div>
+        <div class="field">
+          <label>E-posta</label>
+          <input type="email" id="reg-email" placeholder="ornek@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Şifre</label>
+          <input type="password" id="reg-pass" placeholder="En az 6 karakter" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label>Şifre Tekrar</label>
+          <input type="password" id="reg-pass2" placeholder="Şifreyi tekrar gir" autocomplete="new-password">
+        </div>
+
+        <button class="btn btn-primary" id="reg-btn" onclick="register()">Ücretsiz Başla →</button>
+        <div class="msg" id="reg-msg"></div>`;
+    } else {
+      el.innerHTML = `
+        <div class="logo">
+          <div class="logo-icon">🧭</div>
+          <div><div class="logo-text">Rehber Atlası</div><div class="logo-sub">from Çağatay TOKGÖZ</div></div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab" onclick="setMode('register')">Kayıt Ol</button>
+          <button class="tab active" onclick="setMode('login')">Giriş Yap</button>
+        </div>
+
+        <h1>Hoş Geldiniz</h1>
+        <p class="subtitle">Hesabınıza giriş yapın.</p>
+
+        <div class="field">
+          <label>E-posta</label>
+          <input type="email" id="login-email" placeholder="ornek@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Şifre</label>
+          <input type="password" id="login-pass" placeholder="Şifreniz" autocomplete="current-password">
+        </div>
+
+        <button class="btn btn-primary" id="login-btn" onclick="login()">Giriş Yap →</button>
+        <div class="msg" id="login-msg"></div>`;
+
+      // Enter ile login
+      setTimeout(() => {
+        document.getElementById('login-pass')?.addEventListener('keydown', e => {
+          if (e.key === 'Enter') login();
+        });
+      }, 50);
+    }
+  }
+
+  window.setMode = function(m) { mode = m; render(); };
+
+  window.register = async function() {
+    const name = document.getElementById('reg-name')?.value.trim();
+    const org = document.getElementById('reg-org')?.value.trim();
+    const email = document.getElementById('reg-email')?.value.trim();
+    const pass = document.getElementById('reg-pass')?.value;
+    const pass2 = document.getElementById('reg-pass2')?.value;
+    const msg = document.getElementById('reg-msg');
+    const btn = document.getElementById('reg-btn');
+
+    if (!name) { msg.className='msg error'; msg.textContent='Ad Soyad gerekli.'; return; }
+    if (!email) { msg.className='msg error'; msg.textContent='E-posta gerekli.'; return; }
+    if (!pass || pass.length < 6) { msg.className='msg error'; msg.textContent='Şifre en az 6 karakter olmalı.'; return; }
+    if (pass !== pass2) { msg.className='msg error'; msg.textContent='Şifreler eşleşmiyor.'; return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Hesap oluşturuluyor…';
+    msg.textContent = '';
+
+    try {
+      // Firebase Auth ile kullanıcı oluştur
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      const uid = cred.user.uid;
+
+      // Firestore'a kullanıcı profili yaz (demo paketi)
+      await setDoc(doc(db, 'user', uid), {
+        ...DEMO_PACKAGE,
+        name,
+        email,
+        ...(org ? { organization: org } : {}),
+        registeredAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Başarı ekranı
+      document.getElementById('app').innerHTML = `
+        <div class="logo">
+          <div class="logo-icon">🧭</div>
+          <div><div class="logo-text">Rehber Atlası</div></div>
+        </div>
+        <div class="success-screen">
+          <div class="success-icon">🎉</div>
+          <div class="success-title">Hesabınız Hazır!</div>
+          <div class="success-desc">
+            <strong>${esc(name)}</strong>, hoş geldiniz!<br><br>
+            Demo paketiniz aktif:<br>
+            <strong>1 ölçüm · 5 AI hakkı</strong><br><br>
+            Uygulamaya giriş yapabilirsiniz.
+          </div>
+          <a href="./index.html" style="display:block;padding:14px;background:var(--brand);color:white;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;text-align:center;">
+            Uygulamayı Aç →
+          </a>
+        </div>`;
+
+    } catch(e) {
+      btn.disabled = false;
+      btn.innerHTML = 'Ücretsiz Başla →';
+      const errMap = {
+        'auth/email-already-in-use': 'Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.',
+        'auth/invalid-email': 'Geçersiz e-posta adresi.',
+        'auth/weak-password': 'Şifre çok zayıf. En az 6 karakter kullanın.',
+        'auth/network-request-failed': 'Ağ hatası. İnternet bağlantınızı kontrol edin.',
+      };
+      msg.className = 'msg error';
+      msg.textContent = errMap[e.code] || ('Hata: ' + e.message);
+    }
+  };
+
+  window.login = async function() {
+    const email = document.getElementById('login-email')?.value.trim();
+    const pass = document.getElementById('login-pass')?.value;
+    const msg = document.getElementById('login-msg');
+    const btn = document.getElementById('login-btn');
+
+    if (!email || !pass) { msg.className='msg error'; msg.textContent='E-posta ve şifre gerekli.'; return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Giriş yapılıyor…';
+
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      // Başarılı giriş — uygulamaya yönlendir
+      window.location.href = './index.html';
+    } catch(e) {
+      btn.disabled = false;
+      btn.innerHTML = 'Giriş Yap →';
+      const errMap = {
+        'auth/invalid-credential': 'E-posta veya şifre hatalı.',
+        'auth/user-not-found': 'Bu e-posta ile kayıtlı hesap bulunamadı.',
+        'auth/wrong-password': 'Şifre hatalı.',
+        'auth/invalid-email': 'Geçersiz e-posta adresi.',
+        'auth/network-request-failed': 'Ağ hatası. İnternet bağlantınızı kontrol edin.',
+      };
+      msg.className = 'msg error';
+      msg.textContent = errMap[e.code] || ('Giriş başarısız: ' + e.message);
+    }
+  };
+
+  // İlk render
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+rules_version = '2';
+// ═══════════════════════════════════════════════════════════════════
+// REHBER ATLASI — FIRESTORE GÜVENLİK KURALLARI
+// ═══════════════════════════════════════════════════════════════════
+// Bu dosyayı Firebase Console → Firestore Database → Kurallar
+// sekmesine yapıştırıp "Yayınla" butonuna basın.
+// ═══════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Kullanıcı profilleri (plan, kalan ölçüm sayısı vb.) ──────
+    // Sadece kendi profilini okuyup yazabilir
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ─── Anket oturumları ─────────────────────────────────────────
+    // Okuma: Herkes (öğrenciler linkten erişecek — giriş yapmazlar)
+    // Yazma: Oturum sahibi (admin/rehber öğretmen)
+    match /survey_sessions/{sessionId} {
+      allow read: if true; // Öğrenciler anonim erişecek
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null
+                            && resource.data.userId == request.auth.uid;
+    }
+
+    // ─── Anket yanıtları ─────────────────────────────────────────
+    // Oluşturma: Herkes (anonim öğrenciler de)
+    // Okuma: Oturumun sahibi olan öğretmen
+    // Alan doğrulama: responseId, sessionId, participantId, answers zorunlu
+    //                 Diğerleri opsiyonel (infoFormData, enneaAnswers, openMode, vb.)
+    match /survey_responses/{responseId} {
+      allow create: if
+        // Zorunlu alanlar var mı?
+        request.resource.data.keys().hasAll(['responseId', 'sessionId', 'participantId', 'answers', 'submittedAt'])
+        // sessionId bir string
+        && request.resource.data.sessionId is string
+        // participantId bir string
+        && request.resource.data.participantId is string
+        // answers bir list
+        && request.resource.data.answers is list;
+
+      // Okuma: öğretmen kendi oturumunun yanıtlarını görebilir
+      // (Güvenlik açısından daha sıkı kural istersen: oturumu açanın uid'si ile eşleştir)
+      allow read: if request.auth != null;
+
+      // Güncelleme/silme yok — yanıtlar immutable
+      allow update: if false;
+      allow delete: if request.auth != null;
+    }
+
+    // ─── Diğer tüm koleksiyonlar — varsayılan reddet ─────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
